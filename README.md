@@ -3,14 +3,21 @@ My dotfiles (Linux, OSX &amp; Windows)
 
 ## Install
 
-After you've got git on your system:
+After you've got `git` on your system:
 
-```bash
+```sh
 git clone git@github.com:duzun/dotfiles.git ~/.dotfiles && ~/.dotfiles/init.sh 
 ```
 
-If you don't have git, but latter install it and want to setup git:
+Install without `git`:
 
-```bash
+```sh
+curl -L -o ~/dotfiles.zip "https://github.com/duzun/dotfiles/archive/master.zip" && unzip ~/dotfiles.zip -d ~ && mv ~/dotfiles-master ~/.dotfiles && ~/.dotfiles/init.sh
+
+```
+
+If you don't have `git`, but latter install it and want to setup git:
+
+```sh
 ~/.dotfiles/init_git.sh -f
 ```
