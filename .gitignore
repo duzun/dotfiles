@@ -1,0 +1,6 @@
+error.log
+npm-debug.log
+
+~/.extend.*
+
+*.sublime-workspace

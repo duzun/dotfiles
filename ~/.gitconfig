@@ -1,0 +1,29 @@
+[merge]
+	tool = kdiff3
+[diff]
+	guitool = kdiff3
+[core]
+	editor = subl -w
+	autocrlf = false
+	filemode = false
+[alias]
+	unadd = reset HEAD
+[color]
+	ui = true
+[credential]
+;   helper = manager
+;   helper = wincred
+	helper = gnome-keyring
+	modalprompt = true
+[push]
+	default = simple
+[user]
+	name = Dumitru Uzun
+	email = contact@duzun.me
+	username = duzun
+[filter "lfs"]
+	clean = git lfs clean %f
+	smudge = git lfs smudge %f
+	required = true
+[cola]
+	spellcheck = false

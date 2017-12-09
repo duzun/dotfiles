@@ -1,0 +1,36 @@
+
+alias www="cd /var/www/"
+alias proj="cd /var/www/projects"
+
+# open like on Max
+alias open="xdg-open"
+
+# Disable beep
+command -v xset > /dev/null && xset -b
+#setterm -blength 0 2>&1
+
+yaourt=`command -v yaourt`
+if [ ! -z "$yaourt" ]; then
+    alias y="yaourt"                  # search
+    alias yq="yaourt --noconfirm"     # search +silent
+    alias yu="yaourt -Syu"            # update & upgrade
+    alias yuq="yaourt -Syu --noconfirm"            # update & upgrade
+    alias yua="yaourt -Syua"          # update & upgrade + AUR (less safe)
+    alias yuaq="yaourt -Syua --noconfirm"          # update & upgrade + AUR (less safe)
+    alias yi="yaourt -S"              # <pkg_name> # install
+    alias yiq="yaourt --noconfirm -S" # <pkg_name> # install +silent
+    alias yr="yaourt -R"              # <pkg_name> # uninstall
+    alias yrf="yaourt -Rsn"           # <pkg_name> # uninstall completely: configs and dependencies
+    alias yl="yaourt -Qm"             # list installed packages
+fi
+
+systemctl=`command -v systemctl`
+if [ ! -z "$systemctl" ]; then
+    alias ss="systemctl"
+    alias ssv="systemctl status"
+    alias sss="systemctl start"
+    alias sst="systemctl stop"
+    alias ssl="systemctl reload"
+    alias ssr="systemctl restart"
+    alias sse="systemctl enable"
+fi

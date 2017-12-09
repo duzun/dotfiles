@@ -1,0 +1,86 @@
+# Functions
+#alias ..="cd .."
+
+# $ .. [nr]
+function ..() {
+    local i=$1
+    if [ $# -eq 0 ]
+    then
+        i=1
+    fi
+    local LASTDIR=$PWD
+    while [ $i -gt 0 ]
+    do
+        cd ..
+        i=$(($i - 1))
+    done
+    export OLDPWD=$LASTDIR
+}
+
+# $ up "part_str"
+function up {
+    local up=`expr "$PWD" : "^\(.*$1[^/]*\)"`
+    [ "x$up" == "x" ] || cd $up
+}
+
+function f() {
+    find $PWD -type f -name $1
+}
+
+# This alias recursively destroys all .DS_Store files in the folder I am currently in
+alias killDS='find . -name *.DS_Store -type f -delete'
+
+# ls
+alias ls="ls --color=tty"
+alias l='ls -alh'
+alias la="ls -ah"
+alias ll="ls -lh"
+alias l.="ls -dh .*"
+
+
+# Git
+alias g="git"
+alias gva="git status"
+alias gv="git status ."
+alias gda="git diff"
+alias gd="git diff ."
+alias ga="git add"
+alias gap="git add -p"
+alias gaa="git add --all"
+alias gc="git commit"
+alias gcm="git commit -m"
+alias gu="git push"
+alias gut="git push --tags"
+alias guf="git push -f"
+alias gl="git pull"
+alias gls="git pull --rebase"
+alias gs="git rebase"
+alias gss="git rebase --skip"
+alias gsc="git rebase --continue"
+alias glo="git pull origin"
+alias go="git checkout"
+alias ge="git merge"
+alias gr="git remote"
+alias gb="git branch"
+alias gt="git tag"
+alias gf="git fetch"
+alias gg="git log"
+
+function tgcm() {
+    GIT_AUTHOR_DATE=$1 GIT_COMMITTER_DATE=$1 gcm "$2" --date $1
+}
+
+alias psgrep="ps -aux | grep -v grep | grep --color"
+
+# NPM
+# alias n="npm"
+alias nu="npm update"
+alias ni="npm i"
+alias ns="npm run"
+alias np="npm publish"
+
+# Composer
+alias cu="composer update"
+alias ci="composer install"
+alias cr="composer require"
+alias cs="composer run-script"
