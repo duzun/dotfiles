@@ -68,6 +68,13 @@ function tgcm() {
     GIT_AUTHOR_DATE=$1 GIT_COMMITTER_DATE=$1 gcm "$2" --date $1
 }
 
+if command -v complete > /dev/null;
+then
+    # Enable completion for aliases
+    complete -o default -o nospace -F _git_branch gb
+    complete -o default -o nospace -F _git_checkout go
+fi
+
 # NPM
 # alias n="npm"
 alias nu="npm update"

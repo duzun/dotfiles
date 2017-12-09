@@ -1,6 +1,6 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.0.0    #
+#  @version 2.0.1    #
 ######################
 
 
@@ -48,10 +48,6 @@ function composerbin() {
     return $?;
 }
 
-# Enable completion for aliases
-complete -o default -o nospace -F _git_branch gb
-complete -o default -o nospace -F _git_checkout gco
-
 function bash_prompt() {
     # regular colors
     local K="\[\033[0;30m\]"    # black
@@ -92,16 +88,15 @@ function bash_prompt() {
 # If running interactively, set PS1
 [[ "$-" == *i* ]] && [ ! -z "$BASH" ] && bash_prompt;
 
-if command -v shopt > /dev/null; then so=shopt
-elif command -v setopt > /dev/null; then so=setopt
+if command -v shopt > /dev/null; then
+    # in zsh there is `setopt`, but we preffer default for zsh
+
+    # Check the window size after each command and, if necessary, update the values of LINES and COLUMNS.
+    shopt -s checkwinsize
+
+    # Append all commands to the history file; don't overwrite it at the start of every new session
+    shopt -s histappend
 fi
-
-# Check the window size after each command and, if necessary, update the values of LINES and COLUMNS.
-$so -s checkwinsize &> /dev/null
-
-# Append all commands to the history file; don't overwrite it at the start of every new session
-$so -s histappend
-
 
 # echo .: ${BASH_SOURCE[@]}
 # if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi

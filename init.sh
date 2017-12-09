@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # @author Dumitru Uzun (DUzun.Me)
-# @version 1.1.0
+# @version 1.2.0
+
+[ -e ~/.profile ] && [ ! -e ~/.extend.profile ] && mv ~/.profile ~/.extend.profile
+[ -e ~/.aliasrc ] && [ ! -e ~/.extend.aliasrc ] && mv ~/.aliasrc ~/.extend.aliasrc
 
 p="$(realpath `dirname $0`)/~"
 ln -sf "$p/.profile" ~/
