@@ -25,10 +25,10 @@
 	diff = auto
 	branch = auto
 [credential]
+	modalprompt = true
 ;   helper = manager
 ;   helper = wincred
-	helper = gnome-keyring
-	modalprompt = true
+;	helper = gnome-keyring
 [push]
 	default = simple
 [branch]

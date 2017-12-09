@@ -61,6 +61,7 @@ alias gw^="gw HEAD^"
 alias gw^^="gw HEAD^^"
 alias gw^^^="gw HEAD^^^"
 alias gw^^^^="gw HEAD^^^^"
+alias gfg="git config --global"
 
 function tgcm() {
     GIT_AUTHOR_DATE=$1 GIT_COMMITTER_DATE=$1 gcm "$2" --date $1
