@@ -5,6 +5,7 @@
 
 p="$(realpath `dirname $0`)/~"
 ln -sf "$p/.profile" ~/
+ln -s "$p/.aliasrc" ~/
 ln -sf "$p/.gitignore" ~/
 ln -sf "$p/.curlrc" ~/
 ln -sf "$p/.vimrc" ~/
