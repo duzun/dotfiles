@@ -1,9 +1,11 @@
 # Functions
 #alias ..="cd .."
 
+# grep process:
 alias psgrep="ps aux | head -n1; ps aux | grep -v grep | grep --color -i"
 
-# ls
+# ls:
+
 # Portable ls with colors
 if ls --color -d . >/dev/null 2>&1; then
     alias ls='ls --color=auto'  # Linux

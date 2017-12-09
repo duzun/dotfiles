@@ -1,15 +1,12 @@
-    ######################
-    #  DUzun's .profile  #
-    #      Windows       #
-    #   @version 1.3.0   #
-    ######################
+######################
+#  DUzun's .profile  #
+#      Windows       #
+#   @version 1.4.0   #
+######################
 
 
 # Set user-defined locale
 # export LANG=$(locale -uU)
-
-# This is a DEV machine
-[ -z "$ENV" ] && ENV=dev && export ENV
 
 if [ "$(uname)" == "Darwin" ]; then
     # Do something under Mac OS X platform
@@ -54,8 +51,8 @@ function edit() {
 function overdel() {
     p=`raelpath $1`
     find "$p" -type f | while read i; do
-        s=`ls -l $i | awk '{print $5}'`; 
-        echo "$s > $i"; 
+        s=`ls -l $i | awk '{print $5}'`;
+        echo "$s > $i";
         head -c $s < /dev/urandom > "$i";
         rm -rf "$i";
     done;
@@ -78,8 +75,9 @@ complete -o default -o nospace -F _git_branch gb
 complete -o default -o nospace -F _git_checkout gco
 
 # If running interactively, set PS1
-if [[ "$-" == *i* ]]
+if [[ "$-" == *i* ]] && [ ! -z "$BASH" ]
 then
+
     if [ -f ~/.bash-git-prompt/gitprompt.sh ]; then
         . ~/.bash-git-prompt/gitprompt.sh
         GIT_PROMPT_ONLY_IN_REPO=1
