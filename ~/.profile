@@ -1,6 +1,6 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.0.1    #
+#  @version 2.0.2    #
 ######################
 
 
@@ -72,9 +72,15 @@ function bash_prompt() {
     # reset
     local RESET="\[\033[0;37m\]"
 
-    if [ -f ~/.bash-git-prompt/gitprompt.sh ]; then
+    # curl -L -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+
+    GIT_PROMPT_ONLY_IN_REPO=1
+    if [ -f /usr/share/git/git-prompt.sh ]; then
+        . /usr/share/git/git-prompt.sh
+    elif [ -f ~/.git-prompt.sh ]; then
+        . ~/.git-prompt.sh
+    elif [ -f ~/.bash-git-prompt/gitprompt.sh ]; then
         . ~/.bash-git-prompt/gitprompt.sh
-        GIT_PROMPT_ONLY_IN_REPO=1
     fi
 
     # If the git completion function exists, then use its built-in command prompt

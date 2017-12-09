@@ -9,6 +9,9 @@ if [[ $? > 0 ]]; then
     exit 1
 fi
 
+# [ ! -z "$BASH" ] && ! command -v __git_ps1 > /dev/null && [ ! -e ~/.git-prompt.sh ] && \
+# curl -L -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+
 gfg="git config --global"
 
 _force=$(echo $@ | grep -- '-f')
