@@ -217,8 +217,7 @@ function getcertnames() {
     fi;
 }
 
-if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
-_profile=`realpath ${BASH_SOURCE[0]}`
+_profile=`realpath ${BASH_SOURCE:-$0}`
 _dotfiles=`dirname "$_profile"`
 
 [ ! -z "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";

@@ -1,7 +1,7 @@
 ######################
 #  DUzun's .profile  #
 #      Windows       #
-#   @version 1.5.0   #
+#   @version 1.5.2   #
 ######################
 
 
@@ -11,13 +11,6 @@
 ###############################################################################
 # Shell behavior                                                              #
 ###############################################################################
-
-# Check the window size after each command and, if necessary, update the values
-# of LINES and COLUMNS.
-shopt -s checkwinsize
-
-# Append all commands to the history file; don't overwrite it at the start of every new session
-shopt -s histappend
 
 # Increase the history file size and set some sane defaults
 export HISTSIZE=20000
@@ -77,14 +70,25 @@ then
     fi
 fi
 
-# Load OS speciffic .profile
-# echo .: ${BASH_SOURCE[@]}
-if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
+command -v shopt > /dev/null && so=shopt || \
+command -v setopt > /dev/null && so=setopt
 
-_profile=`realpath ${BASH_SOURCE[0]}`
+# Check the window size after each command and, if necessary, update the values of LINES and COLUMNS.
+$so -s checkwinsize &> /dev/null
+
+# Append all commands to the history file; don't overwrite it at the start of every new session
+$so -s histappend
+
+
+# echo .: ${BASH_SOURCE[@]}
+# if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
+
+_profile=`realpath ${BASH_SOURCE:-$0}`
 _dotfiles=`dirname "$_profile"`
 
 [ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
+
+# Load OS speciffic .profile
 [ ! -z "$_os" ] && [ -f "$_profile.$_os" ] && . "$_profile.$_os";
 
 export NVM_DIR=~/.nvm
