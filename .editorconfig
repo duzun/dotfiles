@@ -24,6 +24,10 @@ trim_trailing_whitespace = false
 indent_style = space
 indent_size = 2
 
+[.gitconfig]
+indent_style = tab
+indent_size = 4
+
 [*.sublime-project]
 indent_style = tab
 indent_size = 4

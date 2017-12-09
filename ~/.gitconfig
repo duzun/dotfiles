@@ -1,15 +1,29 @@
-[merge]
-	tool = kdiff3
-[diff]
-	guitool = kdiff3
+[user]
+;	name = Dumitru Uzun
+;	email = contact@duzun.me
+;	username = duzun
 [core]
 	editor = subl -w
 	autocrlf = false
 	filemode = false
 [alias]
+	who = shortlog -s -n --no-merges
+	standup = shortlog --since=yesterday
+	today = shortlog --since=midnight
 	unadd = reset HEAD
+	uncommit = reset HEAD^
+	unamend = reset --soft HEAD@{1}
+	subs = submodule foreach git pull origin master
+	hist = for-each-ref --count=5 --sort=-committerdate --format='%(refname:short)' refs/heads/
+[merge]
+	tool = kdiff3
+[diff]
+	guitool = kdiff3
 [color]
 	ui = true
+	status = auto
+	diff = auto
+	branch = auto
 [credential]
 ;   helper = manager
 ;   helper = wincred
@@ -17,13 +31,13 @@
 	modalprompt = true
 [push]
 	default = simple
-[user]
-	name = Dumitru Uzun
-	email = contact@duzun.me
-	username = duzun
+[branch]
+	autosetuprebase = always
 [filter "lfs"]
 	clean = git lfs clean %f
 	smudge = git lfs smudge %f
 	required = true
 [cola]
 	spellcheck = false
+[web]
+	browser = open

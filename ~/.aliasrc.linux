@@ -34,3 +34,10 @@ if [ ! -z "$systemctl" ]; then
     alias ssr="systemctl restart"
     alias sse="systemctl enable"
 fi
+
+
+# Empty the Trash
+function emptytrash() {
+    rm -rfv ~/.local/share/Trash/*
+    rm -rfv ~/.Trash;
+}
