@@ -1,26 +1,12 @@
 ######################
 #  DUzun's .profile  #
 #      Windows       #
-#   @version 1.4.0   #
+#   @version 1.5.0   #
 ######################
 
 
 # Set user-defined locale
 # export LANG=$(locale -uU)
-
-if [ "$(uname)" == "Darwin" ]; then
-    # Do something under Mac OS X platform
-    _os=osx
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    # Do something under GNU/Linux platform
-    _os=linux
-elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-    # Do something under Windows NT platform
-    _os=windows
-fi
-
-export NVM_DIR=~/.nvm
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
 ###############################################################################
 # Shell behavior                                                              #
@@ -98,17 +84,11 @@ if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
 _profile=`realpath ${BASH_SOURCE[0]}`
 _dotfiles=`dirname "$_profile"`
 
-function inalias() {
-    local p=$1
-    [ -z "$p" ] && p=$_dotfiles;
-    if [ -z "$p" ] ; then return 1; fi
-    [ -f "$p/.aliasrc" ] && . "$p/.aliasrc";
-    [ ! -z "$_os" ] && [ -f "$p/.aliasrc.$_os" ] && . "$p/.aliasrc.$_os";
-    [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;
-}
+[ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
+[ ! -z "$_os" ] && [ -f "$_profile.$_os" ] && . "$_profile.$_os";
 
-if [ ! -z "$_os" ] && [ -f "$_profile.$_os" ] ; then . "$_profile.$_os"; fi
-inalias $_dotfiles;
+export NVM_DIR=~/.nvm
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
 npmbin;
 composerbin;
