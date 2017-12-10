@@ -1,11 +1,11 @@
 # Functions
 #alias ..="cd .."
 
-if [ "$(uname)" == "Darwin" ]; then
+if [ "$(uname)" = "Darwin" ]; then
     _os=osx
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
     _os=linux
-elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW32_NT" ]; then
     _os=windows
 fi
 
@@ -145,7 +145,7 @@ alias ....='cd ../../..'
 # $ up "partial_str"
 function up {
     local up=`expr "$PWD" : "^\(.*$1[^/]*\)"`
-    [ "x$up" == "x" ] || cd $up
+    [ "x$up" = "x" ] || cd $up
 }
 
 # Create directory and cd to it
@@ -226,6 +226,8 @@ function getcertnames() {
 
 _profile=`realpath ${BASH_SOURCE:-$0}`
 _dotfiles=`dirname "$_profile"`
+
+alias .update="( cd $_dotfiles && git pull )"
 
 [ ! -z "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;

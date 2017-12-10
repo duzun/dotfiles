@@ -6,7 +6,7 @@ My dotfiles (Linux, OSX &amp; Windows)
 After you've got `git` on your system:
 
 ```sh
-git clone git@github.com:duzun/dotfiles.git ~/.dotfiles && ~/.dotfiles/init.sh 
+git clone https://github.com/duzun/dotfiles.git ~/.dotfiles && ~/.dotfiles/init.sh 
 ```
 
 Install without `git`:
@@ -20,4 +20,12 @@ If you don't have `git`, but latter install it and want to setup git:
 
 ```sh
 ~/.dotfiles/init_git.sh -f
+```
+
+## Update
+
+There is a special alias for updating `dotfiles`:
+
+```sh
+.update
 ```
