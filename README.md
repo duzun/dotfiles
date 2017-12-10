@@ -1,5 +1,6 @@
 # dotfiles
-My dotfiles (Linux, OSX &amp; Windows)
+
+My dotfiles (Linux, OSX &amp; Windows) for bash &amp; zsh on PC &amp; server
 
 ## Install
 
