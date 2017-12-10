@@ -28,5 +28,14 @@ done
 
 . ~/.profile
 
+# Try to take care of sourcing .profile automatically
+if [ ! -z "$SHELL" ] && [ -f ~/".${SHELL##*/}rc" ]; then
+    _rc=~/".${SHELL##*/}rc";
+    if ! grep ". ~/.profile" "$_rc" && ! grep "source ~/.profile" "$_rc"; then
+        echo "" >> "$_rc"
+        echo ". ~/.profile" >> "$_rc"
+    fi
+fi
+
 # ln -sf "$p/.gitconfig" ~/
 $p/../init_git.sh
