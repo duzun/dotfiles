@@ -9,7 +9,7 @@ if [[ $? > 0 ]]; then
     exit 1
 fi
 
-# [ ! -z "$BASH" ] && ! command -v __git_ps1 > /dev/null && [ ! -e ~/.git-prompt.sh ] && \
+# [ -n "$BASH" ] && ! command -v __git_ps1 > /dev/null && [ ! -e ~/.git-prompt.sh ] && \
 # curl -L -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
 
 gfg="git config --global"
@@ -51,7 +51,7 @@ for _name in name email username; do
         elif [[ "$_name" == "username" ]]; then
             _default=$_username
             if [[ "$_default" == "root" ]] || [[ "$_default" == "user" ]]; then
-                if [ ! -z "$_pv" ]; then
+                if [ -n "$_pv" ]; then
                     _default=${_pv%%\@*}
                 fi
             fi
@@ -61,10 +61,10 @@ for _name in name email username; do
     _dvb=" ($_default)";
     [ -z "$_default" ] && _dvb=;
 
-    if [ -z "$_value" ] || [ ! -z "$_force" ] ; then
+    if [ -z "$_value" ] || [ -n "$_force" ] ; then
         read -p "    $_section.$_name$_dvb:" v;
-        [ -z "$v" ] && [ ! -z "$_default" ] && v=$_default
-        if [ ! -z "$v" ]; then
+        [ -z "$v" ] && [ -n "$_default" ] && v=$_default
+        if [ -n "$v" ]; then
             $gfg "$_section.$_name" "$v";
             _value=$v;
         fi
@@ -75,7 +75,7 @@ done
 
 _name=credential.helper
 $gfg $_name > /dev/null
-if [ ! -z "$_os" ] && [[ $? != 0 || "$_name" == "store" ]]; then
+if [ -n "$_os" ] && [[ $? != 0 || "$_name" == "store" ]]; then
     case $_os in
         linux)
             hash gnome-keyring && \

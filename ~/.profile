@@ -92,7 +92,7 @@ function bash_prompt() {
 }
 
 # If running interactively, set PS1
-[[ "$-" == *i* ]] && [ ! -z "$BASH" ] && bash_prompt;
+[[ "$-" == *i* ]] && [ -n "$BASH" ] && bash_prompt;
 
 if command -v shopt > /dev/null; then
     # in zsh there is `setopt`, but we preffer default for zsh
@@ -113,7 +113,7 @@ _dotfiles=`dirname "$_profile"`
 [ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
 
 # Load OS speciffic .profile
-[ ! -z "$_os" ] && [ -f "$_profile.$_os" ] && . "$_profile.$_os";
+[ -n "$_os" ] && [ -f "$_profile.$_os" ] && . "$_profile.$_os";
 
 export NVM_DIR=~/.nvm
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm

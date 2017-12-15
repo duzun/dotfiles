@@ -1,6 +1,10 @@
-# Functions
+#######################
+# Functions & Aliases #
+#######################
+
 #alias ..="cd .."
 
+# Detect OS type
 if [ "$(uname)" = "Darwin" ]; then
     _os=osx
 elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
@@ -9,8 +13,6 @@ elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW32_NT" ]; then
     _os=windows
 fi
 
-
-# ls:
 
 # Portable ls with colors
 if ls --color -d . >/dev/null 2>&1; then
@@ -59,9 +61,9 @@ alias gg="git log"
 alias gk="git cherry-pick"
 alias gw="git show"
 alias gw^="gw HEAD^"
-alias gw^^="gw HEAD^^"
-alias gw^^^="gw HEAD^^^"
-alias gw^^^^="gw HEAD^^^^"
+alias gw^^="gw HEAD~2"
+alias gw^^^="gw HEAD~3"
+alias gw^^^^="gw HEAD~4"
 alias gfg="git config --global"
 
 function tgcm() {
@@ -76,7 +78,6 @@ then
 fi
 
 # NPM
-# alias n="npm"
 alias nu="npm update"
 alias ni="npm i"
 alias ns="npm run"
@@ -99,16 +100,137 @@ alias drm="docker rm"
 alias db="docker build"
 alias dbt="docker build -t"
 
-alias netports="netstat -tulpn"
-
-# grep process:
-alias psgrep="ps aux | head -n1; ps aux | grep -v grep | grep --color -i"
-
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec ${SHELL} -l"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
+
+alias netports="netstat -tulpn"
+
+# grep process:
+alias psgrep="ps aux | head -n1; ps aux | grep -v grep | grep --color -i"
+
+# @author DUzun.Me
+function psmem() {
+    local help
+    local cmd
+    local user
+    local grep
+    local POSITIONAL=()
+
+    # Parse parameters
+    while [[ $# -gt 0 ]]; do
+        local key="$1"
+
+        case $key in
+            -g|--grep)
+                grep="$2"
+                shift # past argument
+                shift # past value
+            ;;
+            -u|--user)
+                user="$2"
+                shift # past argument
+                shift # past value
+            ;;
+            -c|-C|--cmd)
+                cmd="$2"
+                shift # past argument
+                shift # past value
+            ;;
+            --help)
+                help=1
+            ;;
+            *)    # unknown option
+                POSITIONAL+=("$1") # save it in an array for later
+                shift # past argument
+            ;;
+        esac
+    done
+
+    set -- "${POSITIONAL[@]}" # restore positional parameters
+
+    if [ -z "$cmd" ]; then
+        cmd="$1"
+        shift
+    fi
+
+    # Show usage/help
+    if [ -z "$cmd" ] && [ -z "$grep" ] && [ -z "$user" ] && [ -z "$@" ] || [ -n "$help" ]; then
+        echo "Usage:"
+        echo "   psmem [-g grep] [-u user] ... [-c] command"
+        echo "   psmem --help"
+        echo ""
+        echo '   All extra parameters go to `ps`'
+        return 1
+    fi
+
+    local h=rss
+    local a="$@"
+    local e=
+    if [ -n "$user" ]; then
+        a="$a -A"
+        h="user,$h"
+        e="$e | awk '\$1 == \"$user\"' | cut -d' ' -f1 -s --complement"
+        if [ -n "$cmd" ]; then
+            h="$h,comm"
+            e="$e | awk '\$2 == \"$cmd\"'"
+        else
+            [ -n "$grep" ] && h="$h,comm"
+        fi
+    else
+        if [ -n "$cmd" ]; then
+            a="$a -C '$cmd'"
+        else
+            a="$a -A"
+        fi
+        [ -n "$grep" ] && h="$h,comm"
+    fi
+
+    local e="ps --no-headers -o '$h' $a$e"
+    [ -n "$grep" ] && e="$e | grep -v grep | grep -i '$grep'"
+    if [ "$h" != "rss" ]; then
+        cmd=`eval $e | awk '{print $2}' | sort | uniq -c | sort -k1 -nr | awk '{print "("$2" x"$1")"}'`
+        e="$e | awk '{print \$1}'"
+    else
+        cmd=;
+    fi
+
+    echo -n "${cmd[@]}" "RAM: "
+    a=`eval $e`
+    h=`echo "${a[@]}" | wc -w`
+    if [ "$h" -gt 0 ]; then
+        echo -n `( IFS=$'\n'; echo "${a[@]}" ) | awk '{ sum+=$1 } END { printf ("%s%d%s", "~", sum/NR/1024,"M") }'` x$h" = "
+        echo `( IFS=$'\n'; echo "${a[@]}" ) | awk '{ sum+=$1 } END { printf ("%d%s", sum/1024,"M") }'`
+    else
+        echo none
+    fi
+}
+
+function psmemo() {
+    local p=$1
+    local g=$2
+    local h=rss # comm
+    [ -n "$g" ] && h=$h,user
+
+    list() {
+        if [ -z "$g" ]; then
+            ps --no-headers -o "$h" -C $p
+        else
+            ps --no-headers -o "$h" -C $p | grep $g
+        fi
+    }
+
+    local c=`list | wc -l`
+    echo -n \"$1\" "RAM: "
+    if [ "$c" -gt 0 ]; then
+        echo -n `list | awk '{ sum+=$1 } END { printf ("%s%d%s", "~", sum/NR/1024,"M") }'` x$c" = "
+        echo `list | awk '{ sum+=$1 } END { printf ("%d%s", sum/1024,"M") }'`
+    else
+        echo none
+    fi
+}
 
 # This alias recursively destroys all .DS_Store files in the folder I am currently in
 alias killDS="find . -type f -name '*.DS_Store' -ls -delete"
@@ -167,6 +289,16 @@ done
 # For example, to list all directories that contain a certain file:
 # find . -name .gitattributes | map dirname
 alias map="xargs -n1"
+
+# randhex $byte_length
+function randhex() {
+    head -c${1:-32} /dev/urandom | hexdump -v -e '1/1 "%02x"'
+}
+
+# randtext $byte_length
+function randtext() {
+    head -c${1:-32} /dev/urandom | base64 | tr -d '='
+}
 
 # Determine size of a file or total size of a directory
 function fs() {
@@ -229,5 +361,5 @@ _dotfiles=`dirname "$_profile"`
 
 alias .update="( cd $_dotfiles && git pull && . $_dotfiles/.profile )"
 
-[ ! -z "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
+[ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;
