@@ -13,7 +13,7 @@ elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW32_NT" ]; then
     _os=windows
 fi
 
-
+# ------------------------------------------------------------------------------
 # Portable ls with colors
 if ls --color -d . >/dev/null 2>&1; then
     alias ls='ls --color=auto'  # Linux
@@ -100,6 +100,7 @@ alias drm="docker rm"
 alias db="docker build"
 alias dbt="docker build -t"
 
+# ------------------------------------------------------------------------------
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec ${SHELL} -l"
 
@@ -111,6 +112,7 @@ alias netports="netstat -tulpn"
 # grep process:
 alias psgrep="ps aux | head -n1; ps aux | grep -v grep | grep --color -i"
 
+# psmem [-g grep] [-u user] ... [-c] command
 # @author DUzun.Me
 function psmem() {
     local help
@@ -208,6 +210,7 @@ function psmem() {
     fi
 }
 
+# @author DUzun.Me
 function psmemo() {
     local p=$1
     local g=$2
@@ -232,6 +235,7 @@ function psmemo() {
     fi
 }
 
+# ------------------------------------------------------------------------------
 # This alias recursively destroys all .DS_Store files in the folder I am currently in
 alias killDS="find . -type f -name '*.DS_Store' -ls -delete"
 
@@ -244,7 +248,9 @@ command -v md5sum > /dev/null || alias md5sum="md5"
 # macOS has no `sha1sum`, so use `shasum` as a fallback
 command -v sha1sum > /dev/null || alias sha1sum="shasum"
 
+# ------------------------------------------------------------------------------
 # $ .. [nr]
+# @author DUzun.Me
 function ..() {
     local i=$1
     if [ $# -eq 0 ]
@@ -314,6 +320,7 @@ function fs() {
     fi;
 }
 
+# ------------------------------------------------------------------------------
 # Create a data URL from a file
 function dataurl() {
     local mimeType=$(file -b --mime-type "$1");
@@ -323,6 +330,7 @@ function dataurl() {
     echo "data:${mimeType};base64,$(openssl base64 -in "$1" | tr -d '\n')";
 }
 
+# ------------------------------------------------------------------------------
 # Show all the names (CNs and SANs) listed in the SSL certificate for a given domain
 function getcertnames() {
     local domain=${1:-"`hostname`"};
@@ -356,6 +364,7 @@ function getcertnames() {
     fi;
 }
 
+# ------------------------------------------------------------------------------
 _profile=`realpath ${BASH_SOURCE:-$0}`
 _dotfiles=`dirname "$_profile"`
 

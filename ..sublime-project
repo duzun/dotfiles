@@ -1,0 +1,15 @@
+{
+	"settings":
+	{
+		"rulers": [80, 100],
+		// "tab_size": 4, // moved to .editorconfig
+		// "translate_tabs_to_spaces": true, // moved to .editorconfig
+		"trim_trailing_white_space_on_save": true
+	},
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	]
+}

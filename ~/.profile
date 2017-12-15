@@ -91,6 +91,7 @@ function bash_prompt() {
     fi
 }
 
+# ------------------------------------------------------------------------------
 # If running interactively, set PS1
 [[ "$-" == *i* ]] && [ -n "$BASH" ] && bash_prompt;
 
@@ -104,6 +105,7 @@ if command -v shopt > /dev/null; then
     shopt -s histappend
 fi
 
+# ------------------------------------------------------------------------------
 # echo .: ${BASH_SOURCE[@]}
 # if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
 
@@ -115,8 +117,10 @@ _dotfiles=`dirname "$_profile"`
 # Load OS speciffic .profile
 [ -n "$_os" ] && [ -f "$_profile.$_os" ] && . "$_profile.$_os";
 
+# ------------------------------------------------------------------------------
 export NVM_DIR=~/.nvm
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
+# ------------------------------------------------------------------------------
 npmbin;
 composerbin;
