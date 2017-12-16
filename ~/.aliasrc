@@ -235,6 +235,20 @@ function psmemo() {
     fi
 }
 
+# Import an /etc/passw line
+# Eg. `impw 'duzun:x:1000:1000:Dumitru Uzun,,,,duzun.me:/home/duzun:/bin/bash'`
+function impw() {
+    local login=`echo $1 | cut -d: -f1`
+    local uid=`echo $1 | cut -d: -f3`
+    local gid=`echo $1 | cut -d: -f4`
+    local comment=`echo $1 | cut -d: -f5`
+    local home=`echo $1 | cut -d: -f6`
+    local shell=`echo $1 | cut -d: -f7`
+    shift
+
+    useradd -u "$uid" -g "$gid" -d "$home" -s "$shell" -c "$comment" $@ "$login"
+}
+
 # ------------------------------------------------------------------------------
 # This alias recursively destroys all .DS_Store files in the folder I am currently in
 alias killDS="find . -type f -name '*.DS_Store' -ls -delete"
