@@ -93,12 +93,20 @@ alias cs="composer run-script"
 alias dv="docker ps"
 alias dva="docker ps -a"
 alias dn="docker run"
+alias de="docker exec"
+alias dei="docker exec -it"
 alias ds="docker start"
 alias dr="docker restart"
 alias dt="docker stop"
 alias drm="docker rm"
 alias db="docker build"
 alias dbt="docker build -t"
+
+# docker-compose
+alias dcs="docker-compose -p \${PWD//\//-}"
+alias dcsb="dcs build"
+alias dcsu="dcs up -d"
+alias dcsd="dcs down"
 
 # ------------------------------------------------------------------------------
 # Reload the shell (i.e. invoke as a login shell)
@@ -159,7 +167,7 @@ function psmem() {
     fi
 
     # Show usage/help
-    if [ -z "$cmd" ] && [ -z "$grep" ] && [ -z "$user" ] && [ -z "$@" ] || [ -n "$help" ]; then
+    if [ -z "$cmd" -a -z "$grep" -a -z "$user" -a -z "$@" ] || [ -n "$help" ]; then
         echo "Usage:"
         echo "   psmem [-g grep] [-u user] ... [-c] command"
         echo "   psmem --help"
@@ -384,5 +392,5 @@ _dotfiles=`dirname "$_profile"`
 
 alias .update="( cd $_dotfiles && git pull && . $_dotfiles/.profile )"
 
-[ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
+[ -n "$_os" -a -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;
