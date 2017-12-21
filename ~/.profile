@@ -1,6 +1,6 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.0.2    #
+#  @version 2.1.0    #
 ######################
 
 
@@ -116,6 +116,9 @@ _dotfiles=`dirname "$_profile"`
 
 # Load OS speciffic .profile
 [ -n "$_os" -a -f "$_profile.$_os" ] && . "$_profile.$_os";
+
+# Custom .profile
+[ -f ~/.extend.profile ] && . ~/.extend.profile;
 
 # ------------------------------------------------------------------------------
 export NVM_DIR=~/.nvm

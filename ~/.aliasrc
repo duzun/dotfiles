@@ -166,8 +166,12 @@ function psmem() {
         shift
     fi
 
+    local h=rss
+    local a="$@"
+    local e=
+
     # Show usage/help
-    if [ -z "$cmd" -a -z "$grep" -a -z "$user" -a -z "$@" ] || [ -n "$help" ]; then
+    if [ -z "$cmd" -a -z "$grep" -a -z "$user" -a -z "$a" ] || [ -n "$help" ]; then
         echo "Usage:"
         echo "   psmem [-g grep] [-u user] ... [-c] command"
         echo "   psmem --help"
@@ -176,9 +180,6 @@ function psmem() {
         return 1
     fi
 
-    local h=rss
-    local a="$@"
-    local e=
     if [ -n "$user" ]; then
         a="$a -A"
         h="user,$h"
