@@ -1,6 +1,6 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.1.0    #
+#  @version 2.1.1    #
 ######################
 
 
@@ -117,9 +117,6 @@ _dotfiles=`dirname "$_profile"`
 # Load OS speciffic .profile
 [ -n "$_os" -a -f "$_profile.$_os" ] && . "$_profile.$_os";
 
-# Custom .profile
-[ -f ~/.extend.profile ] && . ~/.extend.profile;
-
 # ------------------------------------------------------------------------------
 export NVM_DIR=~/.nvm
 if [ -s "$NVM_DIR/nvm.sh" ]; then
@@ -131,6 +128,10 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
     # load it with nvm
     command -v node > /dev/null || nvm use node
 fi
+
+# ------------------------------------------------------------------------------
+# Custom .profile
+[ -f ~/.extend.profile ] && . ~/.extend.profile;
 
 # ------------------------------------------------------------------------------
 npmbin;
