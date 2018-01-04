@@ -1,14 +1,36 @@
 
+# Disable beep
+command -v xset > /dev/null && xset -b
+#setterm -blength 0 2>&1
+
 alias www="cd /var/www/"
 alias proj="cd /var/www/projects"
 
 # open like on Max
 alias open="xdg-open"
 
-# Disable beep
-command -v xset > /dev/null && xset -b
-#setterm -blength 0 2>&1
+# pause like on Windows
+alias pause="read -t15 -n1 -r -p 'Press any key to continue...' key"
 
+# Empty the Trash
+function emptytrash() {
+    rm -rfv ~/.local/share/Trash/*
+    rm -rfv ~/.Trash;
+}
+
+# for systemd
+systemctl=`command -v systemctl`
+if [ -n "$systemctl" ]; then
+    alias ss="systemctl"
+    alias ssv="systemctl status"
+    alias sss="systemctl start"
+    alias sst="systemctl stop"
+    alias ssl="systemctl reload"
+    alias ssr="systemctl restart"
+    alias sse="systemctl enable"
+fi
+
+# for Manjaro
 yaourt=`command -v yaourt`
 if [ -n "$yaourt" ]; then
     alias y="yaourt"                  # search
@@ -23,21 +45,3 @@ if [ -n "$yaourt" ]; then
     alias yrf="yaourt -Rsn"           # <pkg_name> # uninstall completely: configs and dependencies
     alias yl="yaourt -Qm"             # list installed packages
 fi
-
-systemctl=`command -v systemctl`
-if [ -n "$systemctl" ]; then
-    alias ss="systemctl"
-    alias ssv="systemctl status"
-    alias sss="systemctl start"
-    alias sst="systemctl stop"
-    alias ssl="systemctl reload"
-    alias ssr="systemctl restart"
-    alias sse="systemctl enable"
-fi
-
-
-# Empty the Trash
-function emptytrash() {
-    rm -rfv ~/.local/share/Trash/*
-    rm -rfv ~/.Trash;
-}

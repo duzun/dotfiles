@@ -5,13 +5,16 @@
 #alias ..="cd .."
 
 # Detect OS type
-if [ "$(uname)" = "Darwin" ]; then
-    _os=osx
-elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
-    _os=linux
-elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW32_NT" ]; then
-    _os=windows
-fi
+_os=`uname`
+case $_os in
+    Linux*)           _os=linux ;;
+    Darwin*)          _os=osx ;;
+    FreeBSD|OpenBSD)  _os=bsd ;;
+    SunOS)            _os=sun ;;
+    MINGW32_NT*)      _os=windows ;;
+    *)                _os=${_os,,} ;;
+    # *)                _os=`echo $_os | awk '{print tolower($0)}'` ;;
+esac
 
 # ------------------------------------------------------------------------------
 # Portable ls with colors
@@ -26,6 +29,28 @@ alias la="ls -ah"
 alias ll="ls -lh"
 alias l='ll -a'
 alias l.="ls -dh .*"
+
+## Colorize the grep command output for ease of use (good for log files)##
+alias grep &>/dev/null || alias grep='grep --color=auto'
+alias egrep &>/dev/null || alias egrep='egrep --color=auto'
+alias egrep &>/dev/null || alias fgrep='fgrep --color=auto'
+
+
+# Add safety nets
+
+## do not delete / or prompt if deleting more than 3 files at a time #
+alias rm='rm -I --preserve-root'
+
+## confirmation #
+alias mv='mv -i'
+alias cp='cp -i'
+alias ln='ln -i'
+
+## Parenting changing perms on / #
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
+
 
 # Git
 alias g="git"
@@ -109,13 +134,33 @@ alias dcsu="dcs up -d"
 alias dcsd="dcs down"
 
 # ------------------------------------------------------------------------------
+## shortcut  for iptables and pass it via sudo#
+alias ipt='sudo /sbin/iptables'
+
+# display all rules #
+alias iptlist='sudo /sbin/iptables -L -n -v --line-numbers'
+alias iptlistin='sudo /sbin/iptables -L INPUT -n -v --line-numbers'
+alias iptlistout='sudo /sbin/iptables -L OUTPUT -n -v --line-numbers'
+alias iptlistfw='sudo /sbin/iptables -L FORWARD -n -v --line-numbers'
+alias firewall=iptlist
+
+# ------------------------------------------------------------------------------
+command -v colordiff > /dev/null && alias diff='colordiff'
+
+# ------------------------------------------------------------------------------
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec ${SHELL} -l"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
 
-alias netports="netstat -tulpn"
+alias nowtime='date +"%T"'
+alias nowdate='date +"%d-%m-%Y"'
+
+# Stop after sending count ECHO_REQUEST packets #
+alias ping='ping -c 5'
+
+alias netports="netstat -tulapn"
 
 # grep process:
 alias psgrep="ps aux | head -n1; ps aux | grep -v grep | grep --color -i"
@@ -259,6 +304,18 @@ function impw() {
 }
 
 # ------------------------------------------------------------------------------
+alias root="sudo -i"
+command -v su > /dev/null || alias su="sudo -i"
+
+# reboot / halt / poweroff
+if [ "$UID" != "0" ]; then
+    alias reboot &>/dev/null || alias reboot='sudo /sbin/reboot'
+    alias poweroff='sudo /sbin/poweroff'
+    alias halt='sudo /sbin/halt'
+    alias shutdown='sudo /sbin/shutdown'
+fi
+
+# ------------------------------------------------------------------------------
 # This alias recursively destroys all .DS_Store files in the folder I am currently in
 alias killDS="find . -type f -name '*.DS_Store' -ls -delete"
 
@@ -270,6 +327,12 @@ command -v md5sum > /dev/null || alias md5sum="md5"
 
 # macOS has no `sha1sum`, so use `shasum` as a fallback
 command -v sha1sum > /dev/null || alias sha1sum="shasum"
+
+# Generate sha1 digest
+alias sha1="openssl sha1 | cut -d' ' -f2"
+
+# Start calculator with math support
+alias bc='bc -l'
 
 # ------------------------------------------------------------------------------
 # $ .. [nr]
