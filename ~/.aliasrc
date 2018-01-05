@@ -178,7 +178,7 @@ alias ping='ping -c 5'
 alias netports="netstat -tulapn"
 
 # grep process:
-alias psgrep="ps aux | head -n1; ps aux | grep -v grep | grep --color -i"
+alias psgrep='ps aux | head -n1; ps aux | grep -v $$ | grep --color -i'
 
 ## Get cpu info ##
 hash lscpu &> /dev/null && alias cpuinfo='lscpu' || alias cpuinfo='less /proc/cpuinfo'
