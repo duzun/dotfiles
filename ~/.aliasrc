@@ -40,8 +40,12 @@ alias egrep &>/dev/null || alias fgrep='fgrep --color=auto'
 alias nocmt="grep -Ev '^(#|$)'"
 
 ## df & du human readable
-alias df='df -H'
+alias df='df -h'
+alias dfh='df -hlT --exclude-type=tmpfs --exclude-type=devtmpfs'
+alias dft='df -hl | head -1; df -hl --total | grep total'
+
 alias du='du -ch'
+alias dut='du -hsx * | sort -rh | head'
 alias du1='du -d 1'
 
 # Add safety nets
