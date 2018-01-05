@@ -34,6 +34,7 @@ grep -v '^;' "$p/.gitconfig" | while read ln; do
     fi
 done
 
+echo ""
 echo "$gfg:"
 _section=user
 _username=`whoami`
