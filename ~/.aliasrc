@@ -16,6 +16,8 @@ case $_os in
     # *)                _os=`echo $_os | awk '{print tolower($0)}'` ;;
 esac
 
+alias aliasrc='edit ~/.aliasrc; . ~/.aliasrc'
+
 # ------------------------------------------------------------------------------
 # Portable ls with colors
 if ls --color -d . >/dev/null 2>&1; then
@@ -35,6 +37,12 @@ alias grep &>/dev/null || alias grep='grep --color=auto'
 alias egrep &>/dev/null || alias egrep='egrep --color=auto'
 alias egrep &>/dev/null || alias fgrep='fgrep --color=auto'
 
+alias nocmt="grep -Ev '^(#|$)'"
+
+## df & du human readable
+alias df='df -H'
+alias du='du -ch'
+alias du1='du -d 1'
 
 # Add safety nets
 
@@ -147,6 +155,9 @@ alias firewall=iptlist
 # ------------------------------------------------------------------------------
 command -v colordiff > /dev/null && alias diff='colordiff'
 
+# Resume wget by default
+hash wget &> /dev/null && alias wget='wget -c'
+
 # ------------------------------------------------------------------------------
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec ${SHELL} -l"
@@ -164,6 +175,9 @@ alias netports="netstat -tulapn"
 
 # grep process:
 alias psgrep="ps aux | head -n1; ps aux | grep -v grep | grep --color -i"
+
+## Get cpu info ##
+hash lscpu &> /dev/null && alias cpuinfo='lscpu' || alias cpuinfo='less /proc/cpuinfo'
 
 # psmem [-g grep] [-u user] ... [-c] command
 # @author DUzun.Me
@@ -305,7 +319,7 @@ function impw() {
 
 # ------------------------------------------------------------------------------
 alias root="sudo -i"
-command -v su > /dev/null || alias su="sudo -i"
+hash su &> /dev/null || alias su="sudo -i"
 
 # reboot / halt / poweroff
 if [ "$UID" != "0" ]; then
@@ -392,6 +406,27 @@ function randtext() {
     head -c${1:-32} /dev/urandom | base64 | tr -d '='
 }
 
+# Open editor
+function edit() {
+    if [ -f "$EDITOR" ]; then
+        command $EDITOR $EDITOR_ARGS $@;
+    else
+        echo "Editor not found (\$EDITOR='$EDITOR')";
+        return -1;
+    fi;
+}
+
+# Overwrite contents and then remove file
+function overdel() {
+    p=`raelpath $1`
+    find "$p" -type f | while read i; do
+        s=`ls -l $i | awk '{print $5}'`;
+        echo "$s > $i";
+        head -c $s < /dev/urandom > "$i";
+        rm -rf "$i";
+    done;
+}
+
 # Determine size of a file or total size of a directory
 function fs() {
     if du -b /dev/null > /dev/null 2>&1; then
@@ -451,8 +486,8 @@ function getcertnames() {
 }
 
 # ------------------------------------------------------------------------------
-_profile=`realpath ${BASH_SOURCE:-$0}`
-_dotfiles=`dirname "$_profile"`
+_alias=`realpath ${BASH_SOURCE:-$0}`
+_dotfiles=`dirname "$_alias"`
 
 alias .update="( cd $_dotfiles && git pull ) && . $_dotfiles/.profile"
 

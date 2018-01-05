@@ -1,6 +1,6 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.1.1    #
+#  @version 2.1.2    #
 ######################
 
 
@@ -17,36 +17,6 @@ export HISTFILESIZE=10000
 export HISTCONTROL=ignoreboth
 export HISTCONTROL=ignorespace # Don't store commands beginning with a space
 
-function edit() {
-    if [ -f "$EDITOR" ]; then
-        command $EDITOR $@;
-    else
-        echo "Editor not found (\$EDITOR='$EDITOR')";
-        return -1;
-    fi;
-}
-
-function overdel() {
-    p=`raelpath $1`
-    find "$p" -type f | while read i; do
-        s=`ls -l $i | awk '{print $5}'`;
-        echo "$s > $i";
-        head -c $s < /dev/urandom > "$i";
-        rm -rf "$i";
-    done;
-}
-
-function npmbin() {
-    local npmbin=`pwd`/node_modules/.bin;
-    [ -d "$npmbin" ] && PATH=$npmbin:$PATH && echo $npmbin;
-    return $?;
-}
-
-function composerbin() {
-    local composerbin=`pwd`/vendor/bin;
-    [ -d "$composerbin" ] && PATH=$composerbin:$PATH && echo $composerbin;
-    return $?;
-}
 
 function bash_prompt() {
     # regular colors
@@ -106,6 +76,21 @@ if command -v shopt > /dev/null; then
 fi
 
 # ------------------------------------------------------------------------------
+# Add to path npm's bin folder
+function npmbin() {
+    local npmbin=`pwd`/node_modules/.bin;
+    [ -d "$npmbin" ] && PATH=$npmbin:$PATH && echo $npmbin;
+    return $?;
+}
+
+# Add to path composer's bin folder
+function composerbin() {
+    local composerbin=`pwd`/vendor/bin;
+    [ -d "$composerbin" ] && PATH=$composerbin:$PATH && echo $composerbin;
+    return $?;
+}
+
+# ------------------------------------------------------------------------------
 # echo .: ${BASH_SOURCE[@]}
 # if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
 
@@ -116,8 +101,8 @@ _dotfiles=`dirname "$_profile"`
 
 # Load OS speciffic .profile
 [ -n "$_os" -a -f "$_profile.$_os" ] && . "$_profile.$_os";
-
 # ------------------------------------------------------------------------------
+
 export NVM_DIR=~/.nvm
 if [ -s "$NVM_DIR/nvm.sh" ]; then
 
