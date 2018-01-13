@@ -395,6 +395,16 @@ for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
     alias "${method}"="lwp-request -m '${method}'"
 done
 
+# Download first argument to stdout
+if curl=`command -v curl`; then
+    alias download="$curl -sS"
+elif wget=`command -v wget`; then
+    alias download="$wget -qO-"
+## Could use GET alias defined above, but it doesn't support HTTPS by default
+# else
+#     alias download="GET"
+fi;
+
 # Intuitive map function
 # For example, to list all directories that contain a certain file:
 # find . -name .gitattributes | map dirname
