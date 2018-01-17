@@ -42,7 +42,7 @@ alias nocmt="grep -Ev '^(#|$)'"
 ## df & du human readable
 alias df='df -h'
 alias dfh='df -hlT --exclude-type=tmpfs --exclude-type=devtmpfs'
-alias dft='df -hl | head -1; df -hl --total | grep total'
+alias dft='df -hl | head -1; df -hl -x tmpfs -x devtmpfs --total | grep total'
 
 alias du='du -ch'
 alias dut='du -hsx * | sort -rh | head'
