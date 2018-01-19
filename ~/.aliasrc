@@ -47,6 +47,7 @@ alias dft='df -hl | head -1; df -hl -x tmpfs -x devtmpfs --total | grep total'
 alias du='du -ch'
 alias dut='du -hsx * | sort -rh | head'
 alias du1='du -d 1'
+alias du0='du -d 0'
 
 # Add safety nets
 
@@ -434,7 +435,7 @@ function edit() {
 function overdel() {
     p=`realpath $1`
     find "$p" -type f | while read i; do
-        s=`ls -l $i | awk '{print $5}'`;
+        s=`du -sb "$i" | head -1 | awk '{print $1}'`;
         echo "$s > $i";
         head -c $s < /dev/urandom > "$i";
         rm -rf "$i";
