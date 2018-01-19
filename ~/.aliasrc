@@ -432,7 +432,7 @@ function edit() {
 
 # Overwrite contents and then remove file
 function overdel() {
-    p=`raelpath $1`
+    p=`realpath $1`
     find "$p" -type f | while read i; do
         s=`ls -l $i | awk '{print $5}'`;
         echo "$s > $i";
