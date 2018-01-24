@@ -435,7 +435,8 @@ function edit() {
 function overdel() {
     p=`realpath $1`
     find "$p" -type f | while read i; do
-        s=`du -sb "$i" | head -1 | awk '{print $1}'`;
+        # s=`du -sb "$i" | head -1 | awk '{print $1}'`;
+        s=`wc -c < "$i"`;
         echo "$s > $i";
         head -c $s < /dev/urandom > "$i";
         rm -rf "$i";
@@ -455,6 +456,8 @@ function fs() {
         du $arg .[^.]* ./*;
     fi;
 }
+
+command -v filesize > /dev/null || alias filesize="wc -c <"
 
 # ------------------------------------------------------------------------------
 #
