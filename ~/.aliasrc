@@ -1,3 +1,4 @@
+
 #######################
 # Functions & Aliases #
 #######################
@@ -5,7 +6,7 @@
 #alias ..="cd .."
 
 # Detect OS type
-_os=`uname`
+_os=$(uname)
 case $_os in
     Linux*)           _os=linux ;;
     Darwin*)          _os=osx ;;
@@ -13,7 +14,7 @@ case $_os in
     SunOS)            _os=sun ;;
     MINGW32_NT*)      _os=windows ;;
     *)                _os=${_os,,} ;;
-    # *)                _os=`echo $_os | awk '{print tolower($0)}'` ;;
+    # *)                _os=$(echo $_os | awk '{print tolower($0)}') ;;
 esac
 
 alias aliasrc='edit ~/.aliasrc; . ~/.aliasrc'
@@ -105,7 +106,7 @@ alias gw^^^^="gw HEAD~4"
 alias gfg="git config --global"
 
 function tgcm() {
-    GIT_AUTHOR_DATE=$1 GIT_COMMITTER_DATE=$1 gcm "$2" --date $1
+    GIT_AUTHOR_DATE="$1" GIT_COMMITTER_DATE="$1" gcm "$2" --date "$1"
 }
 
 if command -v complete > /dev/null;
@@ -231,11 +232,11 @@ function psmem() {
     fi
 
     local h=rss
-    local a="$@"
+    local a="$*"
     local e=
 
     # Show usage/help
-    if [ -z "$cmd" -a -z "$grep" -a -z "$user" -a -z "$a" ] || [ -n "$help" ]; then
+    if [ -z "$cmd" ] && [ -z "$grep" ] && [ -z "$user" ] && [ -z "$a" ] || [ -n "$help" ]; then
         echo "Usage:"
         echo "   psmem [-g grep] [-u user] ... [-c] command"
         echo "   psmem --help"
@@ -266,18 +267,18 @@ function psmem() {
     local e="ps --no-headers -o '$h' $a$e"
     [ -n "$grep" ] && e="$e | grep -v grep | grep -i '$grep'"
     if [ "$h" != "rss" ]; then
-        cmd=`eval $e | awk '{print $2}' | sort | uniq -c | sort -k1 -nr | awk '{print "("$2" x"$1")"}'`
+        cmd=$(eval "$e" | awk '{print $2}' | sort | uniq -c | sort -k1 -nr | awk '{print "("$2" x"$1")"}')
         e="$e | awk '{print \$1}'"
     else
         cmd=;
     fi
 
     echo -n "${cmd[@]}" "RAM: "
-    a=`eval $e`
-    h=`echo "${a[@]}" | wc -w`
+    a=$(eval "$e")
+    h=$(echo "${a[@]}" | wc -w)
     if [ "$h" -gt 0 ]; then
-        echo -n `( IFS=$'\n'; echo "${a[@]}" ) | awk '{ sum+=$1 } END { printf ("%s%d%s", "~", sum/NR/1024,"M") }'` x$h" = "
-        echo `( IFS=$'\n'; echo "${a[@]}" ) | awk '{ sum+=$1 } END { printf ("%d%s", sum/1024,"M") }'`
+        echo -n "$( ( IFS=$'\n'; echo "${a[@]}" ) | awk '{ sum+=$1 } END { printf ("%s%d%s", "~", sum/NR/1024,"M") }') x$h = "
+        ( IFS=$'\n'; echo "${a[@]}" ) | awk '{ sum+=$1 } END { printf ("%d%s", sum/1024,"M") }'
     else
         echo none
     fi
@@ -288,6 +289,7 @@ function psmemo() {
     local p=$1
     local g=$2
     local h=rss # comm
+    local c
     [ -n "$g" ] && h=$h,user
 
     list() {
@@ -298,11 +300,11 @@ function psmemo() {
         fi
     }
 
-    local c=`list | wc -l`
-    echo -n \"$1\" "RAM: "
+    c=$(list | wc -l)
+    echo -n "\"$1"\" "RAM: "
     if [ "$c" -gt 0 ]; then
-        echo -n `list | awk '{ sum+=$1 } END { printf ("%s%d%s", "~", sum/NR/1024,"M") }'` x$c" = "
-        echo `list | awk '{ sum+=$1 } END { printf ("%d%s", sum/1024,"M") }'`
+        echo -n "$(list | awk '{ sum+=$1 } END { printf ("%s%d%s", "~", sum/NR/1024,"M") }') x$c = "
+        list | awk '{ sum+=$1 } END { printf ("%d%s", sum/1024,"M") }'
     else
         echo none
     fi
@@ -311,15 +313,15 @@ function psmemo() {
 # Import an /etc/passw line
 # Eg. `impw 'duzun:x:1000:1000:Dumitru Uzun,,,,duzun.me:/home/duzun:/bin/bash'`
 function impw() {
-    local login=`echo $1 | cut -d: -f1`
-    local uid=`echo $1 | cut -d: -f3`
-    local gid=`echo $1 | cut -d: -f4`
-    local comment=`echo $1 | cut -d: -f5`
-    local home=`echo $1 | cut -d: -f6`
-    local shell=`echo $1 | cut -d: -f7`
+    local login=$(echo "$1" | cut -d: -f1)
+    local uid=$(echo "$1" | cut -d: -f3)
+    local gid=$(echo "$1" | cut -d: -f4)
+    local comment=$(echo "$1" | cut -d: -f5)
+    local home=$(echo "$1" | cut -d: -f6)
+    local shell=$(echo "$1" | cut -d: -f7)
     shift
 
-    useradd -u "$uid" -g "$gid" -d "$home" -s "$shell" -c "$comment" $@ "$login"
+    useradd -u "$uid" -g "$gid" -d "$home" -s "$shell" -c "$comment" "$@" "$login"
 }
 
 # ------------------------------------------------------------------------------
@@ -366,7 +368,7 @@ function ..() {
     while [ $i -gt 0 ]
     do
         cd ..
-        i=$(($i - 1))
+        i=$((i - 1))
     done
     export OLDPWD=$LASTDIR
 }
@@ -377,7 +379,8 @@ alias ....='cd ../../..'
 # cd up to "partial_str"
 # $ up "partial_str"
 function up {
-    local up=`expr "$PWD" : "^\(.*$1[^/]*\)"`
+    local up;
+    up=$(expr "$PWD" : "^\(.*$1[^/]*\)")
     [ "x$up" = "x" ] || cd $up
 }
 
@@ -388,7 +391,7 @@ function mcd {
 
 # Sort for find file
 function f() {
-    find "$PWD" -type f -name $@
+    find "$PWD" -type 'f' -name "$@"
 }
 
 # One of @janmoesen’s ProTip™s
@@ -397,9 +400,9 @@ for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
 done
 
 # Download first argument to stdout
-if curl=`command -v curl`; then
+if curl=$(command -v curl); then
     alias download="$curl -sS"
-elif wget=`command -v wget`; then
+elif wget=$(command -v wget); then
     alias download="$wget -qO-"
 ## Could use GET alias defined above, but it doesn't support HTTPS by default
 # else
@@ -424,21 +427,21 @@ function randtext() {
 # Open editor
 function edit() {
     if [ -f "$EDITOR" ]; then
-        command $EDITOR $EDITOR_ARGS $@;
+        command $EDITOR $EDITOR_ARGS "$@";
     else
         echo "Editor not found (\$EDITOR='$EDITOR')";
-        return -1;
+        return 255;
     fi;
 }
 
 # Overwrite contents and then remove file
 function overdel() {
-    p=`realpath $1`
-    find "$p" -type f | while read i; do
+    p=$(realpath "$1")
+    find "$p" -type 'f' | while read -r i; do
         # s=`du -sb "$i" | head -1 | awk '{print $1}'`;
-        s=`wc -c < "$i"`;
+        s=$(wc -c < "$i");
         echo "$s > $i";
-        head -c $s < /dev/urandom > "$i";
+        head -c "$s" < /dev/urandom > "$i";
         rm -rf "$i";
     done;
 }
@@ -464,19 +467,19 @@ command -v filesize > /dev/null || alias filesize="wc -c <"
 # # ex - archive extractor
 # # usage: ex <file>
 ex() {
-  if [ -f $1 ] ; then
+  if [ -f "$1" ] ; then
     case $1 in
-      *.tar.bz2)   tar xjf $1   ;;
-      *.tar.gz)    tar xzf $1   ;;
-      *.bz2)       bunzip2 $1   ;;
-      *.rar)       unrar x $1   ;;
-      *.gz)        gunzip $1    ;;
-      *.tar)       tar xf $1    ;;
-      *.tbz2)      tar xjf $1   ;;
-      *.tgz)       tar xzf $1   ;;
-      *.zip)       unzip $1     ;;
-      *.Z)         uncompress $1;;
-      *.7z)        7z x $1      ;;
+      *.tar.bz2)   tar xjf "$1"   ;;
+      *.tar.gz)    tar xzf "$1"   ;;
+      *.bz2)       bunzip2 "$1"   ;;
+      *.rar)       unrar x "$1"   ;;
+      *.gz)        gunzip "$1"    ;;
+      *.tar)       tar xf "$1"    ;;
+      *.tbz2)      tar xjf "$1"   ;;
+      *.tgz)       tar xzf "$1"   ;;
+      *.zip)       unzip "$1"     ;;
+      *.Z)         uncompress "$1";;
+      *.7z)        7z x "$1"      ;;
       *)           echo "'$1' cannot be extracted via ex()" ;;
     esac
   else
@@ -484,9 +487,34 @@ ex() {
   fi
 }
 # ------------------------------------------------------------------------------
+# translit "стринг"
+# echo "текст" | translit
+# translit <<< "стдин"
+translit() {
+    local NAME=${*:-$(cat)};
+    local TRS;
+    TRS=$(sed "y/абвгдезийклмнопрстуфхцы/abvgdezijklmnoprstufxcy/" <<< "$NAME")
+    TRS=$(sed "y/АБВГДЕЗИЙКЛМНОПРСТУФХЦЫ/ABVGDEZIJKLMNOPRSTUFXCY/" <<< "$TRS")
+    TRS=${TRS//ч/ch};
+    TRS=${TRS//Ч/CH} TRS=${TRS//ш/sh};
+    TRS=${TRS//Ш/SH} TRS=${TRS//ё/jo};
+    TRS=${TRS//Ё/JO} TRS=${TRS//ж/zh};
+    TRS=${TRS//Ж/ZH} TRS=${TRS//щ/sh\'};
+    TRS=${TRS///SH\'} TRS=${TRS//э/je};
+    TRS=${TRS//Э/JE} TRS=${TRS//ю/ju};
+    TRS=${TRS//Ю/JU} TRS=${TRS//я/ja};
+    TRS=${TRS//Я/JA} TRS=${TRS//ъ/\`};
+    TRS=${TRS//ъ\`} TRS=${TRS//ь/\'};
+    TRS=${TRS//Ь/\'}
+    hash iconv &> /dev/null && TRS=$(iconv -c -f UTF8 -t ASCII//TRANSLIT <<< "$TRS")
+    echo "$TRS";
+}
+
+# ------------------------------------------------------------------------------
 # Create a data URL from a file
 function dataurl() {
-    local mimeType=$(file -b --mime-type "$1");
+    local mimeType;
+    mimeType=$(file -b --mime-type "$1");
     if [[ $mimeType == text/* ]]; then
         mimeType="${mimeType};charset=utf-8";
     fi
@@ -496,7 +524,8 @@ function dataurl() {
 # ------------------------------------------------------------------------------
 # Show all the names (CNs and SANs) listed in the SSL certificate for a given domain
 function getcertnames() {
-    local domain=${1:-"`hostname`"};
+    local tmp;
+    local domain=${1:-$(hostname)};
     if [ -z "$domain" ]; then
         echo "ERROR: No domain specified.";
         return 1;
@@ -505,11 +534,12 @@ function getcertnames() {
     echo "Testing ${domain}…";
     echo ""; # newline
 
-    local tmp=$(echo -e "GET / HTTP/1.0\nEOT" \
+    tmp=$(echo -e "GET / HTTP/1.0\nEOT" \
         | openssl s_client -connect "${domain}:443" -servername "${domain}" 2>&1);
 
     if [[ "${tmp}" = *"-----BEGIN CERTIFICATE-----"* ]]; then
-        local certText=$(echo "${tmp}" \
+        local certText;
+        certText=$(echo "${tmp}" \
             | openssl x509 -text -certopt "no_aux, no_header, no_issuer, no_pubkey, \
             no_serial, no_sigdump, no_signame, no_validity, no_version");
         echo "Common Name:";
@@ -528,10 +558,14 @@ function getcertnames() {
 }
 
 # ------------------------------------------------------------------------------
-_alias=`realpath ${BASH_SOURCE:-$0}`
-_dotfiles=`dirname "$_alias"`
+# Show the map
+alias mapscii="telnet mapscii.me"
 
-alias .update="( cd $_dotfiles && git pull ) && . $_dotfiles/.profile"
+# ------------------------------------------------------------------------------
+_alias=$(realpath "${BASH_SOURCE:-$0}")
+_dotfiles=$(dirname "$_alias")
 
-[ -n "$_os" -a -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
+alias .update="( cd '$_dotfiles' && git pull ) && . '$_dotfiles/.profile'"
+
+[ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;
