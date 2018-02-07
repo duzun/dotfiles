@@ -93,7 +93,7 @@ function composerbin() {
 }
 
 # ------------------------------------------------------------------------------
-if ! command -v realpath; then
+if ! command -v realpath > /dev/null; then
     _p=$(dirname "${BASH_SOURCE:-$0}")
     _r="$_p/../src/realpath"
     [ -x "$_r/realpath" ] || ( cd "$_r" && make > /dev/null ) && alias realpath="$("$_r/realpath" "$_r/realpath")"

@@ -27,7 +27,7 @@ toextend aliasrc
 unset -f toextend
 
 # Make sure there is `realpath` command, if not, compile it
-if ! command -v realpath; then
+if ! command -v realpath > /dev/null; then
     _p=$(dirname "$0")
     _r="$_p/src/realpath"
     [ -x "$_r/realpath" ] || ( cd "$_r" && make ) && alias realpath="$("$_r/realpath" "$_r/realpath")"
