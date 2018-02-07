@@ -1,6 +1,8 @@
 error.log
 npm-debug.log
 
+*.o
+
 .directory
 
 ~/.extend.*

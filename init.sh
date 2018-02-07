@@ -7,14 +7,14 @@
 # A method to move existing .profile to .extend.profile or .profile.bak
 function toextend() {
     local name=$1
-    if [ -s ~/.$name -a ! -L ~/.$name ]; then
+    if [ -s ~/".$name" ] && [ ! -L ~/".$name" ]; then
         local extend=.extend.$name
-        if [ -s ~/$extend ]; then
-            [ -s ~/.$name.bak ] && echo "Overwriting ~/.$name.bak"
-            mv ~/.$name ~/.$name.bak
+        if [ -s ~/"$extend" ]; then
+            [ -s ~/".$name.bak" ] && echo "Overwriting ~/.$name.bak"
+            mv ~/".$name" ~/".$name.bak"
         else
             # Old .profile becomes .extend.profile
-            mv ~/.$name ~/$extend
+            mv ~/".$name" ~/"$extend"
 
             # Avoid recursive sourcing
             sed -ri "s/((^|^[^#]*\s)(\.|source)\s+(\~|\\\$HOME)\/$extend)/#\\1/" ~/$extend
@@ -26,23 +26,33 @@ toextend profile
 toextend aliasrc
 unset -f toextend
 
-p="$(realpath `dirname $0`)/~"
+# Make sure there is `realpath` command, if not, compile it
+if ! command -v realpath; then
+    _p=$(dirname "$0")
+    _r="$_p/src/realpath"
+    [ -x "$_r/realpath" ] || ( cd "$_r" && make ) && alias realpath="$("$_r/realpath" "$_r/realpath")"
+fi
+
+p=$(dirname "$0")
+p="$(realpath "$p")/~"
 ln -sf "$p/.profile" ~/
 ln -sf "$p/.aliasrc" ~/
 ln -s "$p/.gitignore" ~/
 ln -s "$p/.curlrc" ~/
 ln -s "$p/.vimrc" ~/
 
-ls -a "$p" | grep '^\.extend\.' | while read i; do
+ls -a "$p" | grep '^\.extend\.' | while read -r i; do
     _mark="#dotfiles: $i";
     if [ -e ~/"$i" ] && grep "$_mark" ~/"$i" > /dev/null; then
         echo "$i not updated"
     else
         echo "Updating $i ..."
-        echo "" >> ~/"$i";
-        cat "$p/$i" >> ~/"$i";
-        echo "" >> ~/"$i";
-        echo $_mark >> ~/"$i";
+        {
+            echo "";
+            cat "$p/$i";
+            echo "";
+            echo "$_mark";
+        } >> ~/"$i";
     fi
 done
 
@@ -59,4 +69,4 @@ if [ -n "$SHELL" ] && [ -f ~/".${SHELL##*/}rc" ]; then
 fi
 
 # ln -sf "$p/.gitconfig" ~/
-$p/../init_git.sh
+"$p"/../init_git.sh

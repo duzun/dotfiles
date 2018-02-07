@@ -78,29 +78,39 @@ fi
 # ------------------------------------------------------------------------------
 # Add to path npm's bin folder
 function npmbin() {
-    local npmbin=`pwd`/node_modules/.bin;
-    [ -d "$npmbin" ] && PATH=$npmbin:$PATH && echo $npmbin;
+    local npmbin;
+    npmbin=${PWD:-$(pwd)}/node_modules/.bin;
+    [ -d "$npmbin" ] && PATH=$npmbin:$PATH && echo "$npmbin";
     return $?;
 }
 
 # Add to path composer's bin folder
 function composerbin() {
-    local composerbin=`pwd`/vendor/bin;
-    [ -d "$composerbin" ] && PATH=$composerbin:$PATH && echo $composerbin;
+    local composerbin;
+    composerbin=${PWD:-$(pwd)}/vendor/bin;
+    [ -d "$composerbin" ] && PATH=$composerbin:$PATH && echo "$composerbin";
     return $?;
 }
+
+# ------------------------------------------------------------------------------
+if ! command -v realpath; then
+    _p=$(dirname "${BASH_SOURCE:-$0}")
+    _r="$_p/../src/realpath"
+    [ -x "$_r/realpath" ] || ( cd "$_r" && make > /dev/null ) && alias realpath="$("$_r/realpath" "$_r/realpath")"
+    # ln -s "$_r/realpath" /usr/local/bin/realpath
+fi
 
 # ------------------------------------------------------------------------------
 # echo .: ${BASH_SOURCE[@]}
 # if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
 
-_profile=`realpath ${BASH_SOURCE:-$0}`
-_dotfiles=`dirname "$_profile"`
+_profile=$(realpath "${BASH_SOURCE:-$0}")
+_dotfiles=$(dirname "$_profile")
 
 [ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
 
 # Load OS speciffic .profile
-[ -n "$_os" -a -f "$_profile.$_os" ] && . "$_profile.$_os";
+[ -n "$_os" ] && [ -f "$_profile.$_os" ] && . "$_profile.$_os";
 # ------------------------------------------------------------------------------
 
 export NVM_DIR=~/.nvm

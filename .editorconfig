@@ -17,7 +17,7 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.md]
+[*.{md,markdown}]
 trim_trailing_whitespace = false
 
 [*.json]
@@ -29,5 +29,9 @@ indent_style = tab
 indent_size = 4
 
 [*.sublime-project]
+indent_style = tab
+indent_size = 4
+
+[{Makefile,makefile,*.mk}]
 indent_style = tab
 indent_size = 4
