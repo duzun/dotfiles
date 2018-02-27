@@ -30,7 +30,3 @@ There is a special alias for updating `dotfiles`:
 ```sh
 .update
 ```
-
-## Notes
-
-- [How To Debug a Bash Shell Script](https://www.cyberciti.biz/tips/debugging-shell-script.html)
