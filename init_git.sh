@@ -3,8 +3,7 @@
 # @author Dumitru Uzun (DUzun.Me)
 # @version 1.1.0
 
-hash git
-if [[ $? > 0 ]]; then
+if ! command -v git > /dev/null ; then
     echo "Looks like git is not installed"
     exit 1
 fi
@@ -16,8 +15,8 @@ gfg="git config --global"
 
 _force=$(echo $@ | grep -- '-f')
 
-p="$(realpath `dirname $0`)/~"
-grep -v '^;' "$p/.gitconfig" | while read ln; do
+p="$(realpath "dirname $0")/~"
+grep -v '^;' "$p/.gitconfig" | while read -r ln; do
     ln="${ln##*( )}"
 
     if [[ "${ln:0:1}" == "[" ]]; then
@@ -37,7 +36,7 @@ done
 echo ""
 echo "$gfg:"
 _section=user
-_username=`whoami`
+_username=$(whoami)
 for _name in name email username; do
     _pv=$_value
     _value=$($gfg "$_section.$_name");
@@ -79,7 +78,12 @@ $gfg $_name > /dev/null
 if [ -n "$_os" ] && [[ $? != 0 || "$_name" == "store" ]]; then
     case $_os in
         linux)
-            hash gnome-keyring && \
+            # Try to use KWallet if available
+            _ask=$(command -v ksshaskpass) > /dev/null && \
+            $gfg core.askpass "$_ask"
+
+            # Try to use Gnome-Keyring if available
+            command -v gnome-keyring > /dev/null && \
             $gfg $_name gnome-keyring;
         ;;
         osx)
