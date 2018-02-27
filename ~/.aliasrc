@@ -164,7 +164,7 @@ alias firewall=iptlist
 command -v colordiff > /dev/null && alias diff='colordiff'
 
 # Resume wget by default
-hash wget &> /dev/null && alias wget='wget -c'
+command -v wget > /dev/null && alias wget='wget -c'
 
 # ------------------------------------------------------------------------------
 # Reload the shell (i.e. invoke as a login shell)
@@ -182,10 +182,10 @@ alias ping='ping -c 5'
 alias netports="netstat -tulapn"
 
 # grep process:
-alias psgrep='ps aux | head -n1; ps aux | grep -v $$ | grep --color -i'
+alias psgrep='ps aux | head -n1; ps aux | grep -v '\bgrep\b' | grep --color -i'
 
 ## Get cpu info ##
-hash lscpu &> /dev/null && alias cpuinfo='lscpu' || alias cpuinfo='less /proc/cpuinfo'
+command -v lscpu > /dev/null && alias cpuinfo='lscpu' || alias cpuinfo='less /proc/cpuinfo'
 
 # psmem [-g grep] [-u user] ... [-c] command
 # @author DUzun.Me
@@ -328,7 +328,7 @@ function impw() {
 
 # ------------------------------------------------------------------------------
 alias root="sudo -i"
-hash su &> /dev/null || alias su="sudo -i"
+command -v su > /dev/null || alias su="sudo -i"
 
 # reboot / halt / poweroff
 if [ "$UID" != "0" ]; then
@@ -508,10 +508,38 @@ translit() {
     TRS=${TRS//Я/JA} TRS=${TRS//ъ/\`};
     TRS=${TRS//ъ\`} TRS=${TRS//ь/\'};
     TRS=${TRS//Ь/\'}
-    hash iconv &> /dev/null && TRS=$(iconv -c -f UTF8 -t ASCII//TRANSLIT <<< "$TRS")
+    command -v iconv > /dev/null && TRS=$(iconv -c -f UTF8 -t ASCII//TRANSLIT <<< "$TRS")
     echo "$TRS";
 }
 
+# ------------------------------------------------------------------------------
+# open-url some-file-from-windows.url
+function open-url() {
+    if [ $# -eq 0 ]; then
+        echo "open-url <path/to/file.url>"
+        return 1;
+    fi
+
+    _url="${1}"
+    _u=$(cat "$_url" | grep '^URL=')
+
+    if [ -z "$_u" ]; then
+        echo "open-url: Wrong file format"
+        return 2
+    fi
+
+    _u="${_u:4}"
+
+    for i in 'open' xdg-open google-chrome google-chrome-stable firefox;
+    do
+        if command -v "$i" > /dev/null; then
+            _o="$i";
+            break;
+        fi
+    done
+
+    "$_o" "$_u"
+}
 # ------------------------------------------------------------------------------
 # Create a data URL from a file
 function dataurl() {
@@ -557,6 +585,30 @@ function getcertnames() {
         echo "ERROR: Certificate not found.";
         return 1;
     fi;
+}
+
+# ------------------------------------------------------------------------------
+# https://stackoverflow.com/a/38463476/1242333
+function getspfranges() {
+    domainsToDig=$(dig @8.8.8.8 _spf.$1 TXT +short | \
+    sed \
+        -e 's/"v=spf1//' \
+        -e 's/ ~all"//' \
+        -e 's/ include:/\n/g' | \
+    tail -n+2)
+    for domain in $domainsToDig ; do
+        dig @8.8.8.8 $domain TXT +short | \
+            sed \
+                -e 's/"v=spf1//' \
+                -e 's/ ~all"//' \
+                -e 's/ ip.:/\n/g' | \
+            tail -n+2
+    done
+}
+
+# Get Googles' IPs
+function getgoogleranges() {
+    getspfranges google.com
 }
 
 # ------------------------------------------------------------------------------
