@@ -1,0 +1,10 @@
+
+_p="${BASH_SOURCE:-$0}"
+_r="$(readlink "$_p")" && _p=$_r
+_p="$(dirname "$_p")"
+_r="$_p/realpath"
+
+shopt expand_aliases > /dev/null || shopt -s expand_aliases
+
+[ -x "$_r" ] || ( cd "$_p" && rm -f realpath.o realpath && make > /dev/null ) && \
+alias realpath="$("$_r" "$_r")"
