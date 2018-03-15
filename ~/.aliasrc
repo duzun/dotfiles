@@ -53,7 +53,10 @@ alias du0='du -d 0'
 # Add safety nets
 
 ## do not delete / or prompt if deleting more than 3 files at a time #
-alias rm='rm -I --preserve-root'
+if rm --help | grep -- '--preserve-root' > /dev/null;
+then
+    alias rm='rm -I --preserve-root'
+fi
 
 ## confirmation #
 alias mv='mv -i'
@@ -139,7 +142,10 @@ alias dei="docker exec -it"
 alias ds="docker start"
 alias dr="docker restart"
 alias dt="docker stop"
+alias dp="docker system prune -a"
+alias dvrmd="docker volume rm $(docker volume ls -f dangling=true -q)"
 alias drm="docker rm"
+alias drme="docker rm $(docker ps -qa --no-trunc --filter 'status=exited')"
 alias db="docker build"
 alias dbt="docker build -t"
 
