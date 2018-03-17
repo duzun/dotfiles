@@ -191,7 +191,12 @@ alias netports="netstat -tulapn"
 alias psgrep='ps aux | head -n1; ps aux | grep -v "\bgrep\b" | grep --color -i'
 
 ## Get cpu info ##
-command -v lscpu > /dev/null && alias cpuinfo='lscpu' || alias cpuinfo='less /proc/cpuinfo'
+if command -v lscpu > /dev/null;
+then
+    alias cpuinfo='lscpu'
+else
+    alias cpuinfo='less /proc/cpuinfo'
+fi
 
 # psmem [-g grep] [-u user] ... [-c] command
 # @author DUzun.Me
@@ -402,6 +407,59 @@ function f() {
     find "$PWD" -type 'f' -name "$@"
 }
 
+# Get common part of two string at the beginning
+function str_common_part() {
+    local s="$1"
+    local t="$2"
+    local l=1
+    local n=${#s}
+
+    while [ "${t#${s:0:$l}}" != "$t" ] && [ "$l" -lt $(( n + 1 )) ]; do
+        (( l = l + 1 ))
+    done
+    (( l = l - 1 ))
+
+    echo "${s:0:$l}"
+
+    if [ "$l" -eq 0 ]; then return 1; fi
+}
+
+# Normalize a path string
+function normpath() {
+    # local ret="${1//\/\.\//\/}"
+    local ret="$1"
+    ret=$(echo "$ret" | sed -r 's#/\./#/#g')
+    ret=$(echo "$ret" | sed -r 's#/\.$##g' )
+    ret=$(echo "$ret" | sed -r 's#^\./##g')
+    ret=$(echo "$ret" | sed -r 's#[^\./]+/\.\.(/|$)##g')
+    # @TODO: /path/with/.dot/../or./../or.eve.in.the.middle/.. -> /path/with/
+
+    echo "$ret";
+}
+
+# Returns relative path from $1/$source to $2/$target
+function relpath() {
+    local source=$(normpath "$1")
+    local target=$(normpath "$2")
+
+    if [ "${source: -1}" != "/" ]; then source="$source/"; fi
+
+    local common_part=$(str_common_part "$source" "$target")
+
+    if [ -z "$common_part" ]; then
+        echo "$target";
+        return 1;
+    fi
+
+    if [ "${common_part: -1}" != "/" ]; then common_part="${common_part%/*}/"; fi
+
+    local ret;
+
+    ret=$(sed -r 's#[^\/]+\/#../#g' <<< "${source:${#common_part}}")
+    echo "$ret${target:${#common_part}}";
+}
+
+
 # One of @janmoesen’s ProTip™s
 for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
     alias "${method}"="lwp-request -m '${method}'"
@@ -603,7 +661,7 @@ function getspfranges() {
         -e 's/ include:/\n/g' | \
     tail -n+2)
     for domain in $domainsToDig ; do
-        dig @8.8.8.8 $domain TXT +short | \
+        dig @8.8.8.8 "$domain" TXT +short | \
             sed \
                 -e 's/"v=spf1//' \
                 -e 's/ ~all"//' \
