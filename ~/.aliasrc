@@ -465,6 +465,10 @@ for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
     alias "${method}"="lwp-request -m '${method}'"
 done
 
+# cURL with Cookies
+alias ccurl="curl -b /tmp/cookie_curl.txt -c /tmp/cookie_curl.txt"
+alias ccurl_edit="command $EDITOR /tmp/cookie_curl.txt"
+
 # Download first argument to stdout
 if curl=$(command -v curl); then
     alias download="$curl -sS"
