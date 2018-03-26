@@ -1,3 +1,4 @@
+#!/bin/bash
 
 _p="${BASH_SOURCE:-$0}"
 _r="$(readlink "$_p")" && _p=$_r

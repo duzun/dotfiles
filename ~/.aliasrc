@@ -53,7 +53,7 @@ alias du0='du -d 0'
 # Add safety nets
 
 ## do not delete / or prompt if deleting more than 3 files at a time #
-if rm --help | grep -- '--preserve-root' > /dev/null;
+if rm --help 2> /dev/null | grep -- '--preserve-root' > /dev/null;
 then
     alias rm='rm -I --preserve-root'
 fi

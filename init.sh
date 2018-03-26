@@ -26,14 +26,14 @@ toextend profile
 toextend aliasrc
 unset -f toextend
 
+p="$(dirname "$0")"
+
 # Make sure there is `realpath` command, if not, compile it
+_e=
 if ! command -v realpath > /dev/null; then
-    _p=$(dirname "$0")
-    _r="$_p/src/realpath"
-    [ -x "$_r/realpath" ] || ( cd "$_r" && make ) && alias realpath="$("$_r/realpath" "$_r/realpath")"
+    . "$p/src/realpath/.realpath"
 fi
 
-p=$(dirname "$0")
 p="$(realpath "$p")/~"
 ln -sf "$p/.profile" ~/
 ln -sf "$p/.aliasrc" ~/
@@ -68,5 +68,6 @@ if [ -n "$SHELL" ] && [ -f ~/".${SHELL##*/}rc" ]; then
     fi
 fi
 
-# ln -sf "$p/.gitconfig" ~/
 "$p"/../init_git.sh
+
+[ ! -z "$_e" ] && [ "$_e" -eq "1" ] && shopt -u expand_aliases

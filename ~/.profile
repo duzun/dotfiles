@@ -93,18 +93,23 @@ function composerbin() {
 }
 
 # ------------------------------------------------------------------------------
-if ! command -v realpath > /dev/null; then
-    _p=$(dirname "${BASH_SOURCE:-$0}")
-    _r="$_p/../src/realpath"
-    [ -x "$_r/realpath" ] || ( cd "$_r" && make > /dev/null ) && alias realpath="$("$_r/realpath" "$_r/realpath")"
-    # ln -s "$_r/realpath" /usr/local/bin/realpath
-fi
-
-# ------------------------------------------------------------------------------
 # echo .: ${BASH_SOURCE[@]}
 # if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
 
-_profile=$(realpath "${BASH_SOURCE:-$0}")
+_profile=${BASH_SOURCE:-$0}
+# ------------------------------------------------------------------------------
+if ! command -v realpath > /dev/null; then
+    if _p=$(readlink "$_profile");
+    then
+        _p=$(dirname "$_p")
+    else
+        _p=$(dirname "$_profile")
+    fi
+    . "$_p/../src/realpath/.realpath"
+fi
+
+# ------------------------------------------------------------------------------
+_profile=$(realpath "$_profile")
 _dotfiles=$(dirname "$_profile")
 
 [ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
