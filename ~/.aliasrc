@@ -697,7 +697,7 @@ alias mapscii="telnet mapscii.me"
 _alias=$(realpath "${BASH_SOURCE:-$0}")
 _dotfiles=$(dirname "$_alias")
 
-alias .update="( cd '$_dotfiles' && git pull ) && . '$_dotfiles/.profile'"
+alias .update="( cd '$_dotfiles' && git pull --rebase ) && . '$_dotfiles/.profile'"
 
 [ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;
