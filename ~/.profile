@@ -122,44 +122,6 @@ if ! command -v realpath > /dev/null; then
 fi
 
 # ------------------------------------------------------------------------------
-alias_cmd() {
-    alias "$1" | sed 's/^alias .*='\''//;s/\( .\+\|'\''\)//'
-}
-
-alias_subcmd() {
-    alias "$1" | sed 's/^alias .*='\''[^\s]*\s//;s/\( .\+\|'\''\)//'
-}
-
-alias_completion() {
-    # keep global namespace clean
-    local cmd completion
-
-    # determine first word of alias definition
-    # NOTE: This is really dirty. Is it possible to use
-    #       readline's shell-expand-line or alias-expand-line?
-    cmd=$(alias_cmd "$1")
-
-    # determine completion function
-    completion=$(complete -p "$1" 2>/dev/null)
-
-    # run _completion_loader only if necessary
-    [[ -n $completion ]] || {
-
-        # load completion
-        _completion_loader "$cmd"
-
-        # detect completion
-        completion=$(complete -p "$cmd" 2>/dev/null)
-    }
-
-    # ensure completion was detected
-    [[ -n $completion ]] || return 1
-
-    # configure completion
-    eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
-}
-
-# ------------------------------------------------------------------------------
 _profile=$(realpath "$_profile")
 _dotfiles=$(dirname "$_profile")
 
