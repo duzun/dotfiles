@@ -1,4 +1,3 @@
-
 #######################
 # Functions & Aliases #
 #######################
@@ -38,7 +37,7 @@ alias grep &>/dev/null || alias grep='grep --color=auto'
 alias egrep &>/dev/null || alias egrep='egrep --color=auto'
 alias egrep &>/dev/null || alias fgrep='fgrep --color=auto'
 
-alias nocmt="grep -Ev '^(#|$)'"
+alias nocmt="grep -Ev '^(#|$)'" # grep no comment
 
 ## df & du human readable
 alias df='df -h'
@@ -102,6 +101,7 @@ alias gbu="git branch --set-upstream-to "
 alias gt="git tag"
 alias gf="git fetch"
 alias gg="git log"
+alias ggo="git log --oneline"
 alias gk="git cherry-pick"
 alias gw="git show"
 alias gw^="gw HEAD^"
@@ -114,11 +114,21 @@ function tgcm() {
     GIT_AUTHOR_DATE="$1" GIT_COMMITTER_DATE="$1" gcm "$2" --date "$1"
 }
 
+
 if command -v complete > /dev/null;
 then
+    command -v _completion_loader > /dev/null && _completion_loader git
+
+    alias_completion g;
+    _ga=(gd gb go gs gg gr ge);
+
     # Enable completion for aliases
-    complete -o default -o nospace -F _git_branch gb
-    complete -o default -o nospace -F _git_checkout go
+    if command -v __git_complete > /dev/null;
+    then
+        for a in "${_ga[@]}"; do __git_complete "$a" "_git_$(alias_subcmd "$a")"; done
+    else
+        for a in "${_ga[@]}"; do complete -o default -o nospace -F "_git_$(alias_subcmd "$a")" "$a"; done
+    fi
 fi
 
 # NPM
@@ -399,7 +409,7 @@ function up {
 
 # Create directory and cd to it
 function mcd {
-    mkdir -p "$@" && cd "$_"
+    mkdir -p "$@" && cd "$_" || return $?
 }
 
 # Sort for find file
@@ -439,12 +449,14 @@ function normpath() {
 
 # Returns relative path from $1/$source to $2/$target
 function relpath() {
-    local source=$(normpath "$1")
-    local target=$(normpath "$2")
+    local source target common_part ret
+
+    source=$(normpath "$1")
+    target=$(normpath "$2")
 
     if [ "${source: -1}" != "/" ]; then source="$source/"; fi
 
-    local common_part=$(str_common_part "$source" "$target")
+    common_part=$(str_common_part "$source" "$target")
 
     if [ -z "$common_part" ]; then
         echo "$target";
@@ -452,8 +464,6 @@ function relpath() {
     fi
 
     if [ "${common_part: -1}" != "/" ]; then common_part="${common_part%/*}/"; fi
-
-    local ret;
 
     ret=$(sed -r 's#[^\/]+\/#../#g' <<< "${source:${#common_part}}")
     echo "$ret${target:${#common_part}}";
