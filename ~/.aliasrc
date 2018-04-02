@@ -139,6 +139,7 @@ alias_completion() {
     [[ -n $completion ]] || {
 
         # load completion
+        command -v _completion_loader > /dev/null && \
         _completion_loader "$cmd"
 
         # detect completion
