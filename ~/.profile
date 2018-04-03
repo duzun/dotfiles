@@ -125,25 +125,8 @@ if command -v shopt > /dev/null; then
     shopt -s histappend
 fi
 
+
 # ------------------------------------------------------------------------------
-# Add to path npm's bin folder
-function npmbin() {
-    local npmbin;
-    npmbin=${PWD:-$(pwd)}/node_modules/.bin;
-    ! ( sed 's/:/\n/g' <<<"$PATH" | grep -q "^$npmbin[/]*\$" ) && \
-    [ -d "$npmbin" ] && PATH="$npmbin:$PATH" && echo "$npmbin";
-    return $?;
-}
-
-# Add to path composer's bin folder
-function composerbin() {
-    local composerbin;
-    composerbin=${PWD:-$(pwd)}/vendor/bin;
-    ! ( sed 's/:/\n/g' <<<"$PATH" | grep -q "^$composerbin[/]*\$" ) && \
-    [ -d "$composerbin" ] && PATH="$composerbin:$PATH" && echo "$composerbin";
-    return $?;
-}
-
 [ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
 
 # Load OS speciffic .profile
@@ -160,6 +143,23 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
     # load it with nvm
     command -v node > /dev/null || nvm use node
 fi
+
+# ------------------------------------------------------------------------------
+# Add to path npm's bin folder
+function npmbin() {
+    local npmbin;
+    npmbin=${PWD:-$(pwd)}/node_modules/.bin;
+    add_path "$npmbin" && echo "$npmbin";
+    return $?;
+}
+
+# Add to path composer's bin folder
+function composerbin() {
+    local composerbin;
+    composerbin=${PWD:-$(pwd)}/vendor/bin;
+    add_path "$composerbin" && echo "$composerbin";
+    return $?;
+}
 
 # ------------------------------------------------------------------------------
 # Custom .profile

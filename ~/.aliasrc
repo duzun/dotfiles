@@ -176,6 +176,31 @@ alias reload="exec ${SHELL} -l"
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
 
+is_path() {
+    local p
+    p="${1%/}"
+    [ -z "$p" ] && p="$1"
+    sed 's/:/\n/g' <<<"$PATH" | grep -q "^$p/*\$"
+}
+
+add_path() {
+    ! is_path "$1" && [ -d "$1" ] && export PATH="$1:$PATH"
+}
+path_add() {
+    ! is_path "$1" && [ -d "$1" ] && export PATH="$PATH:$1"
+}
+
+del_path() {
+    local p
+    p="${1%/}"
+    [ -z "$p" ] && p="$1"
+    if is_path "$p";
+    then
+        export PATH;
+        PATH=$(sed 's/:/\n/g' <<<"$PATH" | grep -v "^$p/*\$" | sed '{:q;N;s/\n/:/g;t q}')
+    fi
+}
+
 alias nowtime='date +"%T"'
 alias nowdate='date +"%d-%m-%Y"'
 
