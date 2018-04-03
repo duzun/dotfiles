@@ -1,0 +1,3 @@
+[submodule "complete-alias"]
+	path = complete-alias
+	url = https://github.com/cykerway/complete-alias.git
