@@ -7,7 +7,7 @@ My dotfiles (Linux, OSX &amp; Windows) for bash &amp; zsh on PC &amp; server
 After you've got `git` on your system:
 
 ```sh
-git clone https://github.com/duzun/dotfiles.git ~/.dotfiles && ~/.dotfiles/init.sh 
+git clone --recurse-submodules https://github.com/duzun/dotfiles.git ~/.dotfiles && ~/.dotfiles/init.sh 
 ```
 
 Install without `git`:
