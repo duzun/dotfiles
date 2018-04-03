@@ -2,8 +2,12 @@
 # Functions & Aliases #
 #######################
 
-#alias ..="cd .."
 
+# ------------------------------------------------------------------------------
+_alias=$(realpath "${BASH_SOURCE:-$0}")
+_dotfiles=$(dirname "$_alias")
+
+# ------------------------------------------------------------------------------
 # Detect OS type
 _os=$(uname)
 case $_os in
@@ -113,61 +117,6 @@ alias gfg="git config --global"
 function tgcm() {
     GIT_AUTHOR_DATE="$1" GIT_COMMITTER_DATE="$1" gcm "$2" --date "$1"
 }
-
-# ------------------------------------------------------------------------------
-alias_cmd() {
-    alias "$1" | sed 's/^alias .*='\''//;s/\( .\+\|'\''\)//'
-}
-
-alias_subcmd() {
-    alias "$1" | sed 's/^alias .*='\''[^\s]*\s//;s/\( .\+\|'\''\)//'
-}
-
-alias_completion() {
-    # keep global namespace clean
-    local cmd completion
-
-    # determine first word of alias definition
-    # NOTE: This is really dirty. Is it possible to use
-    #       readline's shell-expand-line or alias-expand-line?
-    cmd=$(alias_cmd "$1")
-
-    # determine completion function
-    completion=$(complete -p "$1" 2>/dev/null)
-
-    # run _completion_loader only if necessary
-    [[ -n $completion ]] || {
-
-        # load completion
-        command -v _completion_loader > /dev/null && \
-        _completion_loader "$cmd"
-
-        # detect completion
-        completion=$(complete -p "$cmd" 2>/dev/null)
-    }
-
-    # ensure completion was detected
-    [[ -n $completion ]] || return 1
-
-    # configure completion
-    eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
-}
-
-if command -v complete > /dev/null;
-then
-    command -v _completion_loader > /dev/null && _completion_loader git
-
-    alias_completion g;
-    _ga=(gd gb go gs gg gr ge);
-
-    # Enable completion for aliases
-    if command -v __git_complete > /dev/null;
-    then
-        for a in "${_ga[@]}"; do __git_complete "$a" "_git_$(alias_subcmd "$a")"; done
-    else
-        for a in "${_ga[@]}"; do complete -o default -o nospace -F "_git_$(alias_subcmd "$a")" "$a"; done
-    fi
-fi
 
 # NPM
 alias nu="npm update"
@@ -417,6 +366,8 @@ alias sha1="openssl sha1 | cut -d' ' -f2"
 alias bc='bc -l'
 
 # ------------------------------------------------------------------------------
+#alias ..="cd .."
+
 # $ .. [nr]
 # @author DUzun.Me
 function ..() {
@@ -738,10 +689,94 @@ function getgoogleranges() {
 alias mapscii="telnet mapscii.me"
 
 # ------------------------------------------------------------------------------
-_alias=$(realpath "${BASH_SOURCE:-$0}")
-_dotfiles=$(dirname "$_alias")
+alias_cmd() {
+    alias "$1" | sed 's/^alias .*='\''//;s/\( .\+\|'\''\)//'
+}
+
+alias_subcmd() {
+    alias "$1" | sed 's/^alias .*='\''[^\s]*\s//;s/\( .\+\|'\''\)//'
+}
+
+alias_completion() {
+    # keep global namespace clean
+    local cmd completion
+
+    # determine first word of alias definition
+    # NOTE: This is really dirty. Is it possible to use
+    #       readline's shell-expand-line or alias-expand-line?
+    cmd=${2:-$(alias_cmd "$1")}
+
+    # determine completion function
+    completion=$(complete -p "$1" 2>/dev/null)
+
+    # run _completion_loader only if necessary
+    [[ -n $completion ]] || {
+
+        # load completion
+        command -v _completion_loader > /dev/null && \
+        _completion_loader "$cmd"
+
+        # detect completion
+        completion=$(complete -p "$cmd" 2>/dev/null)
+    }
+
+    # ensure completion was detected
+    [[ -n $completion ]] || return 1
+
+    # configure completion
+    eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
+}
+
+if command -v complete > /dev/null;
+then
+    if command -v _completion_loader > /dev/null;
+    then
+        _completion_loader git
+        _completion_loader curl
+    fi
+
+    # alias_completion g;
+    _ga=(gd gb go gs gg gr ge);
+
+    # Enable completion for aliases
+    if command -v __git_complete > /dev/null;
+    then
+        for a in "${_ga[@]}"; do __git_complete "$a" "_git_$(alias_subcmd "$a")"; done
+    else
+        for a in "${_ga[@]}"; do complete -o default -o nospace -F "_git_$(alias_subcmd "$a")" "$a"; done
+    fi
+
+    unset _ga
+
+    # if complete-alias is loaded, use it for some aliases
+    if command -v _complete_alias > /dev/null;
+    then
+        _a=( \
+            # git
+            g \
+
+            # npm
+            nu ni ns np \
+
+            # docker
+            dv dva dn de dei ds dr dt drm db dbt \
+
+            # docker-compose
+            dcs dcsb dcsu dcsd \
+
+            ccurl \
+        );
+
+        for a in "${_a[@]}"; do complete -F _complete_alias "$a"; done
+        unset _a
+    fi
+
+    alias_completion mcd mkdir
+    # alias_completion ccurl
+fi
 
 alias .update="( cd '$_dotfiles' && git pull --rebase ) && . '$_dotfiles/.profile'"
+alias .source=". '$_dotfiles/.profile'"
 
 [ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;

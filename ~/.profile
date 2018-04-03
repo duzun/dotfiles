@@ -1,9 +1,30 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.1.3    #
+#  @version 2.2.0    #
 ######################
 
 
+# ------------------------------------------------------------------------------
+# echo .: ${BASH_SOURCE[@]}
+# if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
+
+_profile=${BASH_SOURCE:-$0}
+# ------------------------------------------------------------------------------
+if ! command -v realpath > /dev/null; then
+    if _p=$(readlink "$_profile");
+    then
+        _p=$(dirname "$_p")
+    else
+        _p=$(dirname "$_profile")
+    fi
+    . "$_p/../src/realpath/.realpath"
+fi
+
+# ------------------------------------------------------------------------------
+_profile=$(realpath "$_profile")
+_dotfiles=$(dirname "$_profile")
+
+# ------------------------------------------------------------------------------
 # Set user-defined locale
 # export LANG=$(locale -uU)
 
@@ -72,6 +93,13 @@ then
             . /usr/share/bash-completion/bash_completion
         fi
     fi
+
+    # complete-alias requires bash-completion
+    if command -v _completion_loader > /dev/null && \
+     ! command -v _complete_alias > /dev/null;
+    then
+        . "$_dotfiles/../complete-alias/completions/bash_completion.sh"
+    fi
 fi
 
 # ------------------------------------------------------------------------------
@@ -93,7 +121,8 @@ fi
 function npmbin() {
     local npmbin;
     npmbin=${PWD:-$(pwd)}/node_modules/.bin;
-    [ -d "$npmbin" ] && PATH=$npmbin:$PATH && echo "$npmbin";
+    ! ( sed 's/:/\n/g' <<<"$PATH" | grep -q "^$npmbin[/]*\$" ) && \
+    [ -d "$npmbin" ] && PATH="$npmbin:$PATH" && echo "$npmbin";
     return $?;
 }
 
@@ -101,29 +130,10 @@ function npmbin() {
 function composerbin() {
     local composerbin;
     composerbin=${PWD:-$(pwd)}/vendor/bin;
-    [ -d "$composerbin" ] && PATH=$composerbin:$PATH && echo "$composerbin";
+    ! ( sed 's/:/\n/g' <<<"$PATH" | grep -q "^$composerbin[/]*\$" ) && \
+    [ -d "$composerbin" ] && PATH="$composerbin:$PATH" && echo "$composerbin";
     return $?;
 }
-
-# ------------------------------------------------------------------------------
-# echo .: ${BASH_SOURCE[@]}
-# if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
-
-_profile=${BASH_SOURCE:-$0}
-# ------------------------------------------------------------------------------
-if ! command -v realpath > /dev/null; then
-    if _p=$(readlink "$_profile");
-    then
-        _p=$(dirname "$_p")
-    else
-        _p=$(dirname "$_profile")
-    fi
-    . "$_p/../src/realpath/.realpath"
-fi
-
-# ------------------------------------------------------------------------------
-_profile=$(realpath "$_profile")
-_dotfiles=$(dirname "$_profile")
 
 [ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
 
