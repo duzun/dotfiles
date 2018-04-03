@@ -775,7 +775,7 @@ then
     # alias_completion ccurl
 fi
 
-alias .update="( cd '$_dotfiles' && git pull --rebase ) && . '$_dotfiles/.profile'"
+alias .update="( cd '$_dotfiles' && git pull --rebase --recurse-submodules) && . '$_dotfiles/.profile'"
 alias .source=". '$_dotfiles/.profile'"
 
 [ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";

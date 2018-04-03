@@ -1,6 +1,6 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.2.0    #
+#  @version 2.2.1    #
 ######################
 
 
@@ -98,7 +98,16 @@ then
     if command -v _completion_loader > /dev/null && \
      ! command -v _complete_alias > /dev/null;
     then
-        . "$_dotfiles/../complete-alias/completions/bash_completion.sh"
+        _f="$_dotfiles/../complete-alias/completions/bash_completion.sh"
+        [ -f "$_f" ] || (
+            cd "$_dotfiles/.." && \
+            git submodule init && \
+            git submodule update
+            # cd complete-alias && \
+            # git checkout -f . && \
+            # git pull --rebase
+        )
+        . "$_f"
     fi
 fi
 
