@@ -120,8 +120,8 @@ function tgcm() {
 
 # NPM
 alias nu="npm update"
-alias ni="npm i"
-alias ns="npm run"
+alias ni="npm install"
+alias ns="npm run --silent"
 alias np="npm publish"
 
 # Composer
@@ -197,7 +197,7 @@ del_path() {
     if is_path "$p";
     then
         export PATH;
-        PATH=$(sed 's/:/\n/g' <<<"$PATH" | grep -v "^$p/*\$" | sed '{:q;N;s/\n/:/g;t q}')
+        PATH=$(sed 's/:/\n/g' <<<"$PATH" | grep -v "^$p/*\$" | sed '{ :q;N;s/\n/:/g;t q }')
     fi
 }
 
@@ -491,7 +491,7 @@ done
 
 # cURL with Cookies
 alias ccurl="curl -b /tmp/cookie_curl.txt -c /tmp/cookie_curl.txt"
-alias ccurl_edit="command $EDITOR /tmp/cookie_curl.txt"
+alias ccurl_edit="command \$EDITOR /tmp/cookie_curl.txt"
 
 # Download first argument to stdout
 if curl=$(command -v curl); then
