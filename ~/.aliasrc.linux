@@ -1,7 +1,13 @@
 
-# Disable beep
-command -v xset > /dev/null && xset -b
-#setterm -blength 0 2>&1
+if command -v xset > /dev/null;
+then
+    # Disable beep
+    xset -b
+    #setterm -blength 0 2>&1
+
+    alias screenoff="xset dpms force off"
+fi
+
 
 alias www="cd /var/www/"
 alias proj="cd /var/www/projects"

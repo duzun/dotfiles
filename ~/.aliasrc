@@ -93,6 +93,7 @@ alias guf="gu -f"
 alias gl="git pull"
 alias gls="gl --rebase"
 alias gs="git rebase"
+alias gsi="gs -i"
 alias gss="gs --skip"
 alias gsc="gs --continue"
 alias gsa="gs --abort"
@@ -115,7 +116,9 @@ alias gw^^^^="gw HEAD~4"
 alias gfg="git config --global"
 
 function tgcm() {
-    GIT_AUTHOR_DATE="$1" GIT_COMMITTER_DATE="$1" gcm "$2" --date "$1"
+    local date=$1
+    shift
+    GIT_AUTHOR_DATE="$date" GIT_COMMITTER_DATE="$date" gcm "$@" --date "$date"
 }
 
 # NPM
@@ -147,7 +150,7 @@ alias db="docker build"
 alias dbt="docker build -t"
 
 # docker-compose
-alias dcs="docker-compose -p \${PWD//\//-}"
+alias dcs="p=\${PWD//\//-}; docker-compose -p \${p#*-}"
 alias dcsb="dcs build"
 alias dcsu="dcs up -d"
 alias dcsd="dcs down"
