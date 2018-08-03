@@ -223,6 +223,9 @@ else
     alias cpuinfo='less /proc/cpuinfo'
 fi
 
+alias cpucount='getconf _NPROCESSORS_ONLN'
+
+
 # psmem [-g grep] [-u user] ... [-c] command
 # @author DUzun.Me
 function psmem() {
@@ -497,13 +500,19 @@ alias ccurl="curl -b /tmp/cookie_curl.txt -c /tmp/cookie_curl.txt"
 alias ccurl_edit="command \${EDITOR_PATH:-\$EDITOR} /tmp/cookie_curl.txt"
 
 # Download first argument to stdout
-if curl=$(command -v curl); then
-    alias download="$curl -sS"
-elif wget=$(command -v wget); then
-    alias download="$wget -qO-"
+if command -v curl > /dev/null; then
+    alias download="curl -sS"
+elif command -v wget > /dev/null; then
+    alias download="wget -qO-"
 ## Could use GET alias defined above, but it doesn't support HTTPS by default
 # else
 #     alias download="GET"
+fi;
+
+# Download from FTP
+if command -v wget > /dev/null; then
+    # --ftp-user=<ftp_user> --ftp-password=<ftp_pwd>
+    alias downftp="wget -qr -nH -m"
 fi;
 
 # Intuitive map function

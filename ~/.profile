@@ -36,7 +36,8 @@ _dotfiles=$(dirname "$_profile")
 export HISTSIZE=20000
 export HISTFILESIZE=10000
 export HISTCONTROL=ignoreboth
-export HISTCONTROL=ignorespace # Don't store commands beginning with a space
+# Don't store commands beginning with a space
+export HISTCONTROL=ignorespace
 
 
 function bash_prompt() {
