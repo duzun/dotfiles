@@ -150,7 +150,7 @@ alias db="docker build"
 alias dbt="docker build -t"
 
 # docker-compose
-alias dcs="p=\${PWD//\//-}; docker-compose -p \${p#*-}"
+alias dcs="docker-compose -p \$(pwd | sed 's#[/.]#-#g; s/^-//g')"
 alias dcsb="dcs build"
 alias dcsu="dcs up -d"
 alias dcsd="dcs down"
@@ -494,7 +494,7 @@ done
 
 # cURL with Cookies
 alias ccurl="curl -b /tmp/cookie_curl.txt -c /tmp/cookie_curl.txt"
-alias ccurl_edit="command \$EDITOR /tmp/cookie_curl.txt"
+alias ccurl_edit="command \${EDITOR_PATH:-\$EDITOR} /tmp/cookie_curl.txt"
 
 # Download first argument to stdout
 if curl=$(command -v curl); then
@@ -521,12 +521,12 @@ function randtext() {
     head -c${1:-32} /dev/urandom | base64 | tr -d '='
 }
 
-# Open editor
+# Open editor (no wait)
 function edit() {
-    if [ -f "$EDITOR" ]; then
-        command $EDITOR $EDITOR_ARGS "$@";
+    if [ -f "$EDITOR_PATH" ]; then
+        command $EDITOR_PATH $EDITOR_ARGS "$@";
     else
-        echo "Editor not found (\$EDITOR='$EDITOR')";
+        echo "Editor not found (\$EDITOR_PATH='$EDITOR_PATH')";
         return 255;
     fi;
 }
