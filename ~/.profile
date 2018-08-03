@@ -167,7 +167,7 @@ function composerbin() {
 [ -f ~/.extend.profile ] && . ~/.extend.profile;
 
 # ------------------------------------------------------------------------------
-if [ -z "$EDITOR" ] && [ -n "$EDITOR_PATH" ]; then
+if [ -z "$EDITOR" ] && [ -n "$EDITOR_PATH" ] && [ -x "$EDITOR_PATH" ]; then
     export EDITOR="$EDITOR_PATH $EDITOR_ARGS";
 fi
 
