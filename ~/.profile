@@ -1,6 +1,6 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.3.0    #
+#  @version 2.3.1    #
 ######################
 
 
@@ -11,9 +11,16 @@
 _profile=${BASH_SOURCE:-$0}
 # ------------------------------------------------------------------------------
 if ! command -v realpath > /dev/null; then
-    if _p=$(readlink "$_profile");
+    if _l=$(readlink "$_profile");
     then
-        _p=$(dirname "$_p")
+        _p=$(dirname "$_l")
+        # If symlink is relative:
+        _dotfiles=$(dirname "$_profile")
+        if [ ! -d "$_p" ] && [ -d "$_dotfiles/$_p" ];
+        then
+            _p="$_dotfiles/$_p"
+            # _profile="$_dotfiles/$_l"
+        fi
     else
         _p=$(dirname "$_profile")
     fi

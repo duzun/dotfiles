@@ -61,16 +61,18 @@ then
     alias rm='rm -I --preserve-root'
 fi
 
+## Parenting changing perms on / #
+if chown --help 2> /dev/null | grep -- '--preserve-root' > /dev/null;
+then
+    alias chown='chown --preserve-root'
+    alias chmod='chmod --preserve-root'
+    alias chgrp='chgrp --preserve-root'
+fi
+
 ## confirmation #
 alias mv='mv -i'
 alias cp='cp -i'
 alias ln='ln -i'
-
-## Parenting changing perms on / #
-alias chown='chown --preserve-root'
-alias chmod='chmod --preserve-root'
-alias chgrp='chgrp --preserve-root'
-
 
 # Git
 alias g="git"
