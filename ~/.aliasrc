@@ -9,17 +9,36 @@ _dotfiles=$(dirname "$_alias")
 
 # ------------------------------------------------------------------------------
 # Detect OS type
-_os=$(uname)
-case $_os in
-    Linux*)           _os=linux ;;
-    Darwin*)          _os=osx ;;
-    FreeBSD|OpenBSD)  _os=bsd ;;
-    SunOS)            _os=sun ;;
-    MINGW32_NT*)      _os=windows ;;
-    *)                _os=${_os,,} ;;
-    # *)                _os=$(echo $_os | awk '{print tolower($0)}') ;;
-esac
 
+ostype() {
+    local _os;
+
+    case "$OSTYPE" in
+        solaris*) _os=sun ;;
+        darwin*)  _os=osx ;;
+        linux*)   _os=linux ;;
+        bsd*)     _os=bsd ;;
+        msys*)    _os=windows ;;
+        *)        _os=$(uname)
+            case "$_os" in
+                Linux*)           _os=linux ;;
+                Darwin*)          _os=osx ;;
+                FreeBSD|OpenBSD)  _os=bsd ;;
+                SunOS)            _os=sun ;;
+                MINGW32_NT*)      _os=windows ;;
+                *)       _os="${_os,,}" ;;
+                # *)       _os=$(echo "$_os" | awk '{print tolower($0)}') ;;
+            esac
+        ;;
+    esac
+
+    echo "$_os";
+}
+
+_os=$(ostype)
+
+# ------------------------------------------------------------------------------
+# "Edit this file" command
 alias aliasrc='edit ~/.aliasrc; . ~/.aliasrc'
 
 # ------------------------------------------------------------------------------
