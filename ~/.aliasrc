@@ -37,6 +37,17 @@ ostype() {
 
 _os=$(ostype)
 
+# bash, but cool :-)
+if_os () { [[ $OSTYPE == *$1* ]]; }
+if_nix () {
+    case "$OSTYPE" in
+        *linux*|*hurd*|*msys*|*cygwin*|*sua*|*interix*) sys="gnu";;
+        *bsd*|*darwin*) sys="bsd";;
+        *sunos*|*solaris*|*indiana*|*illumos*|*smartos*) sys="sun";;
+    esac
+    [[ "${sys}" == "$1" ]];
+}
+
 # ------------------------------------------------------------------------------
 # "Edit this file" command
 alias aliasrc='edit ~/.aliasrc; . ~/.aliasrc'
@@ -750,6 +761,24 @@ function getgoogleranges() {
 # ------------------------------------------------------------------------------
 # Show the map
 alias mapscii="telnet mapscii.me"
+
+# ------------------------------------------------------------------------------
+# syncthing rename: Rename files restored from .stversion
+strename() {
+    o=$(realpath -- "$1")
+    d=$(dirname "$o")
+    b=$(basename "$o")
+    n=$(echo "$b" | sed -r 's/^(.+)\~[0-9]{8,8}\-[0-9]{6,6}(\..+)?/\1\2/; s/^\~[0-9]{8,8}\-[0-9]{6,6}(\..+)/\1/');
+
+    if [ -d "$o" ]; then
+        ( shopt -s dotglob && cd "$o" && for i in *; do strename "$i"; done; );
+    fi;
+
+    if [[ "$n" != "$b" ]]; then
+        echo "$d: $b -> $n";
+        mv -- "$o" "$d/$n";
+    fi;
+}
 
 # ------------------------------------------------------------------------------
 alias_cmd() {
