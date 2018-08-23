@@ -74,12 +74,22 @@ alias egrep &>/dev/null || alias fgrep='fgrep --color=auto'
 alias nocmt="grep -Ev '^(#|$)'" # grep no comment
 
 ## df & du human readable
-alias df='df -h'
-alias dfh='df -hlT --exclude-type=tmpfs --exclude-type=devtmpfs'
-alias dft='df -hl | head -1; df -hl -x tmpfs -x devtmpfs --total | grep total'
+if [ "$_os" = "osx" ] || [ "$_os" = "bsd" ]; then
+    alias df='df -H'
+    alias dfh='df -Hl'
+    # alias dft='df -Hl | head -1; df -Hl --total | grep total'
+else
+    alias df='df -h'
+    alias dfh='df -hlT -x tmpfs -x devtmpfs'
+    alias dft='df -hl | head -1; df -hl -x tmpfs -x devtmpfs --total | grep total'
+fi
 
 alias du='du -ch'
-alias dut='du -hsx * | sort -rh | head'
+if sort --help | grep -- '--human' > /dev/null; then
+    alias dut='du -hsx * | sort -rh | head'
+else
+    alias dut='du -hsx * | sort -rn | head'
+fi
 alias du1='du -d 1'
 alias du0='du -d 0'
 
