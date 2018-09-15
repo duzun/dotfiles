@@ -1,6 +1,6 @@
 ######################
 #  DUzun's .profile  #
-#  @version 2.3.1    #
+#  @version 2.3.2    #
 ######################
 
 
@@ -164,6 +164,12 @@ function npmbin() {
 # Add to path composer's bin folder
 function composerbin() {
     local composerbin;
+
+    # Global
+    composerbin=~/.composer/vendor/bin;
+    add_path "$composerbin" # && echo "$composerbin";
+
+    # Local
     composerbin=${PWD:-$(pwd)}/vendor/bin;
     add_path "$composerbin" && echo "$composerbin";
     return $?;
@@ -179,5 +185,5 @@ if [ -z "$EDITOR" ] && [ -n "$EDITOR_PATH" ] && [ -x "$EDITOR_PATH" ]; then
 fi
 
 # ------------------------------------------------------------------------------
-npmbin;
 composerbin;
+npmbin;
