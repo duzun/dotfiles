@@ -246,6 +246,29 @@ del_path() {
     fi
 }
 
+# Test whether a glob has any matches
+# https://stackoverflow.com/questions/2937407/test-whether-a-glob-has-any-matches-in-bash
+function exists() {
+    # Bash
+    if command -v compgen > /dev/null
+    then
+        compgen -G "$1" > /dev/null
+        return $?
+    fi
+
+    # Non-Bash
+    for f in $1; do
+
+        ## Check if the glob gets expanded to existing files.
+        ## If not, f here will be exactly the pattern above
+        ## and the exists test will evaluate to false.
+        [ -e "$f" ] || [ -L "$f" ]
+
+        ## This is all we needed to know, so we can break after the first iteration
+        return $?
+    done
+}
+
 alias nowtime='date +"%T"'
 alias nowdate='date +"%d-%m-%Y"'
 
@@ -604,7 +627,9 @@ function fs() {
     if [[ -n "$@" ]]; then
         du $arg -- "$@";
     else
-        du $arg .[^.]* ./*;
+        exists '.[^.]*' && arg="$arg .[^.]*" # .dotfiles first
+        exists './*'    && arg="$arg ./*"    # simple-files
+        du $arg;
     fi;
 }
 
