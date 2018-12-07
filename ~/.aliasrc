@@ -2,7 +2,6 @@
 # Functions & Aliases #
 #######################
 
-
 # ------------------------------------------------------------------------------
 _alias=$(realpath "${BASH_SOURCE:-$0}")
 _dotfiles=$(dirname "$_alias")
@@ -55,15 +54,23 @@ shelltype() {
         echo 'zsh'
     elif [ -n "${BASH_SOURCE:-}" ] || [ -n "$BASH" ]; then
         echo 'bash'
-    elif [ -n "$shell" ]; then
-        basename "$shell"
-    elif [ -n "$SHELL" ]; then
-        basename "$(realpath "$SHELL")"
     else
-        echo 'sh'; # unknown
-        return 1;
+        local s;
+        s=$(realpath /proc/$$/exe); # it's safer to check real processes' path
+        if [ -n "$s" ] && [ "$s" != "/proc/$$/exe" ] && [ -e "$s" ]; then
+            basename "$s"
+        elif [ -n "$shell" ]; then
+            basename "$shell"
+        elif [ -n "$SHELL" ]; then
+            basename "$(realpath "$SHELL")"
+        else
+            echo 'sh'; # unknown
+            return 1;
+        fi
     fi
 }
+
+_shell=$(shelltype)
 
 # ------------------------------------------------------------------------------
 # "Edit this file" command
@@ -233,7 +240,8 @@ command -v wget > /dev/null && alias wget='wget -c'
 
 # ------------------------------------------------------------------------------
 # Reload the shell (i.e. invoke as a login shell)
-alias reload="exec ${SHELL} -l"
+alias reload_shell="exec \${SHELL} -l"
+alias reload="exec /proc/\$\$/exe -l || exec \${SHELL} -l"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
@@ -274,15 +282,21 @@ function exists() {
     fi
 
     # Exceptions
-    case $(shelltype) in
+    case "$(shelltype)" in
         zsh)
-            if [ -e "$1" ] || [ -L "$1" ]; then return 0; fi
+            local f=$1
+            if [ -e "$f" ] || [ -L "$f" ]; then return 0; fi
+
             # If $1 is a pattern, we have to expand it in zsh:
-            for f in ${~1}; do
-                [ -e "$f" ] || [ -L "$f" ]
-                return $?
-            done
+            local g=$(setopt | grep nullglob)
+            setopt nullglob
+            set -- ${~f} 2> /dev/null
+            [ -z "$g" ] && setopt +o nullglob
+            [ "$f" = "$1" ] && return 1
+            [ -e "$1" ] || [ -L "$1" ]
+            return $?
         ;;
+        # *) ;;
     esac
 
     # Non-Bash
@@ -329,7 +343,7 @@ function psmem() {
     local POSITIONAL=()
 
     # Parse parameters
-    while [[ $# -gt 0 ]]; do
+    while [ $# -gt 0 ]; do
         local key="$1"
 
         case $key in
@@ -360,7 +374,7 @@ function psmem() {
 
     set -- "${POSITIONAL[@]}" # restore positional parameters
 
-    if [ -z "$cmd" ] && [[ $# -gt 0 ]]; then
+    if [ -z "$cmd" ] && [ $# -gt 0 ]; then
         cmd="$1"
         shift
     fi
@@ -647,18 +661,30 @@ function overdel() {
 
 # Determine size of a file or total size of a directory
 function fs() {
-    if du -b /dev/null > /dev/null 2>&1; then
-        local arg=-sbh;
+    local arg
+    if du -b --exclude='*' /dev/null > /dev/null 2>&1; then
+        arg=-sbh;
     else
-        local arg=-sh;
+        arg=-sh;
     fi
-    if [[ -n "$@" ]]; then
-        du $arg -- "$@";
+
+    if [ $# -eq 0 ]; then
+        if exists './*'; then
+            if exists '.[^.]*'; then
+                du $arg -- .[^.]* ./*;
+            else
+                du $arg -- ./*;
+            fi
+        else
+            if exists '.[^.]*'; then
+                du $arg -- .[^.]*;
+            else
+                du $arg;
+            fi
+        fi
     else
-        exists '.[^.]*' && arg="$arg .[^.]*" # .dotfiles first
-        exists './*'    && arg="$arg ./*"    # simple-files
-        du $arg;
-    fi;
+        du $arg -- "$@";
+    fi
 }
 
 command -v filesize > /dev/null || alias filesize="wc -c <"
@@ -933,5 +959,6 @@ fi
 alias .update="( cd '$_dotfiles' && git pull --rebase --recurse-submodules) && . '$_dotfiles/.profile'"
 alias .source=". '$_dotfiles/.profile'"
 
+[ -n "$_shell" ] && [ -f "$_dotfiles/.aliasrc.$_shell" ] && . "$_dotfiles/.aliasrc.$_shell";
 [ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;
