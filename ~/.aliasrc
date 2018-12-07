@@ -49,6 +49,23 @@ if_nix () {
 }
 
 # ------------------------------------------------------------------------------
+# Guess the shell type - doesn't quite work in subshells (when not your login shell)
+shelltype() {
+    if [ -n "$ZSH_NAME" ] || [ -n "$ZSH_VERSION" ]; then
+        echo 'zsh'
+    elif [ -n "${BASH_SOURCE:-}" ] || [ -n "$BASH" ]; then
+        echo 'bash'
+    elif [ -n "$shell" ]; then
+        basename "$shell"
+    elif [ -n "$SHELL" ]; then
+        basename "$(realpath "$SHELL")"
+    else
+        echo 'sh'; # unknown
+        return 1;
+    fi
+}
+
+# ------------------------------------------------------------------------------
 # "Edit this file" command
 alias aliasrc='edit ~/.aliasrc; . ~/.aliasrc'
 
@@ -256,9 +273,20 @@ function exists() {
         return $?
     fi
 
+    # Exceptions
+    case $(shelltype) in
+        zsh)
+            if [ -e "$1" ] || [ -L "$1" ]; then return 0; fi
+            # If $1 is a pattern, we have to expand it in zsh:
+            for f in ${~1}; do
+                [ -e "$f" ] || [ -L "$f" ]
+                return $?
+            done
+        ;;
+    esac
+
     # Non-Bash
     for f in $1; do
-
         ## Check if the glob gets expanded to existing files.
         ## If not, f here will be exactly the pattern above
         ## and the exists test will evaluate to false.
