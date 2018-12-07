@@ -77,6 +77,13 @@ _shell=$(shelltype)
 alias aliasrc='edit ~/.aliasrc; . ~/.aliasrc'
 
 # ------------------------------------------------------------------------------
+
+# echo to stderr
+echo_error() {
+    >&2 echo "$@"
+}
+
+# ------------------------------------------------------------------------------
 # Portable ls with colors
 if ls --color -d . >/dev/null 2>&1; then
     alias ls='ls --color=auto'  # Linux
@@ -181,7 +188,7 @@ alias gw^^^="gw HEAD~3"
 alias gw^^^^="gw HEAD~4"
 alias gfg="git config --global"
 
-function tgcm() {
+tgcm() {
     local date=$1
     shift
     GIT_AUTHOR_DATE="$date" GIT_COMMITTER_DATE="$date" gcm "$@" --date "$date"
@@ -273,7 +280,7 @@ del_path() {
 
 # Test whether a glob has any matches
 # https://stackoverflow.com/questions/2937407/test-whether-a-glob-has-any-matches-in-bash
-function exists() {
+exists() {
     # Bash
     if command -v compgen > /dev/null
     then
@@ -335,7 +342,7 @@ alias cpucount='getconf _NPROCESSORS_ONLN'
 
 # psmem [-g grep] [-u user] ... [-c] command
 # @author DUzun.Me
-function psmem() {
+psmem() {
     local help
     local cmd
     local user
@@ -433,7 +440,7 @@ function psmem() {
 }
 
 # @author DUzun.Me
-function psmemo() {
+psmemo() {
     local p=$1
     local g=$2
     local h=rss # comm
@@ -460,7 +467,7 @@ function psmemo() {
 
 # Import an /etc/passw line
 # Eg. `impw 'duzun:x:1000:1000:Dumitru Uzun,,,,duzun.me:/home/duzun:/bin/bash'`
-function impw() {
+impw() {
     local login=$(echo "$1" | cut -d: -f1)
     local uid=$(echo "$1" | cut -d: -f3)
     local gid=$(echo "$1" | cut -d: -f4)
@@ -508,7 +515,7 @@ alias bc='bc -l'
 
 # $ .. [nr]
 # @author DUzun.Me
-function ..() {
+..() {
     local i=$1
     if [ $# -eq 0 ]
     then
@@ -528,24 +535,24 @@ alias ....='cd ../../..'
 
 # cd up to "partial_str"
 # $ up "partial_str"
-function up {
+up() {
     local up;
     up=$(expr "$PWD" : "^\(.*$1[^/]*\)")
     [ "x$up" = "x" ] || cd $up
 }
 
 # Create directory and cd to it
-function mcd {
+mcd() {
     mkdir -p "$@" && cd "$_" || return $?
 }
 
 # Sort for find file
-function f() {
+f() {
     find "$PWD" -type 'f' -name "$@"
 }
 
 # Get common part of two string at the beginning
-function str_common_part() {
+str_common_part() {
     local s="$1"
     local t="$2"
     local l=1
@@ -562,7 +569,7 @@ function str_common_part() {
 }
 
 # Normalize a path string
-function normpath() {
+normpath() {
     # local ret="${1//\/\.\//\/}"
     local ret="$1"
     ret=$(echo "$ret" | sed -r 's#/\./#/#g')
@@ -575,7 +582,7 @@ function normpath() {
 }
 
 # Returns relative path from $1/$source to $2/$target
-function relpath() {
+relpath() {
     local source target common_part ret
 
     source=$(normpath "$1")
@@ -628,17 +635,17 @@ fi;
 alias map="xargs -n1"
 
 # randhex $byte_length
-function randhex() {
+randhex() {
     head -c${1:-32} /dev/urandom | hexdump -v -e '1/1 "%02x"'
 }
 
 # randtext $byte_length
-function randtext() {
+randtext() {
     head -c${1:-32} /dev/urandom | base64 | tr -d '='
 }
 
 # Open editor (no wait)
-function edit() {
+edit() {
     if [ -f "$EDITOR_PATH" ]; then
         command $EDITOR_PATH $EDITOR_ARGS "$@";
     else
@@ -648,7 +655,7 @@ function edit() {
 }
 
 # Overwrite contents and then remove file
-function overdel() {
+overdel() {
     p=$(realpath "$1")
     find "$p" -type 'f' | while read -r i; do
         # s=`du -sb "$i" | head -1 | awk '{print $1}'`;
@@ -660,7 +667,7 @@ function overdel() {
 }
 
 # Determine size of a file or total size of a directory
-function fs() {
+fs() {
     local arg
     if du -b --exclude='*' /dev/null > /dev/null 2>&1; then
         arg=-sbh;
@@ -688,6 +695,25 @@ function fs() {
 }
 
 command -v filesize > /dev/null || alias filesize="wc -c <"
+
+# Convert a number to memory unit (K, M, G)
+mem_unit() {
+    local sum=${1:-$(cat)}
+    local unit=B
+    if [ "$sum" -gt 1024 ]; then
+        sum=$(( sum / 1024 ))
+        unit=K
+        if [ $sum -gt 1024 ]; then
+            sum=$(( sum / 1024 ))
+            unit=M
+            if [ $sum -gt 1024 ]; then
+                sum=$(( sum / 1024 ))
+                unit=G
+            fi
+        fi
+    fi
+    echo "$sum$unit"
+}
 
 # ------------------------------------------------------------------------------
 #
@@ -750,7 +776,7 @@ translit() {
 
 # ------------------------------------------------------------------------------
 # open-url some-file-from-windows.url
-function open-url() {
+open-url() {
     if [ $# -eq 0 ]; then
         echo "open-url <path/to/file.url>"
         return 1;
@@ -778,7 +804,7 @@ function open-url() {
 }
 # ------------------------------------------------------------------------------
 # Create a data URL from a file
-function dataurl() {
+dataurl() {
     local mimeType;
     mimeType=$(file -b --mime-type "$1");
     if [[ $mimeType == text/* ]]; then
@@ -789,7 +815,7 @@ function dataurl() {
 
 # ------------------------------------------------------------------------------
 # Show all the names (CNs and SANs) listed in the SSL certificate for a given domain
-function getcertnames() {
+getcertnames() {
     local tmp;
     local domain=${1:-$(hostname)};
     if [ -z "$domain" ]; then
@@ -825,7 +851,7 @@ function getcertnames() {
 
 # ------------------------------------------------------------------------------
 # https://stackoverflow.com/a/38463476/1242333
-function getspfranges() {
+getspfranges() {
     domainsToDig=$(dig @8.8.8.8 _spf.$1 TXT +short | \
     sed \
         -e 's/"v=spf1//' \
@@ -843,7 +869,7 @@ function getspfranges() {
 }
 
 # Get Googles' IPs
-function getgoogleranges() {
+getgoogleranges() {
     getspfranges google.com
 }
 

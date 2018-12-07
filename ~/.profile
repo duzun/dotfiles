@@ -47,7 +47,7 @@ export HISTCONTROL=ignoreboth
 export HISTCONTROL=ignorespace
 
 
-function bash_prompt() {
+bash_prompt() {
     # regular colors
     local K="\[\033[0;30m\]"    # black
     local R="\[\033[0;31m\]"    # red
@@ -154,7 +154,7 @@ fi
 
 # ------------------------------------------------------------------------------
 # Add to path npm's bin folder
-function npmbin() {
+npmbin() {
     local npmbin;
     npmbin=${PWD:-$(pwd)}/node_modules/.bin;
     add_path "$npmbin" && echo "$npmbin";
@@ -162,7 +162,7 @@ function npmbin() {
 }
 
 # Add to path composer's bin folder
-function composerbin() {
+composerbin() {
     local composerbin;
 
     # Global

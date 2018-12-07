@@ -5,7 +5,7 @@
 
 
 # A method to move existing .profile to .extend.profile or .profile.bak
-function toextend() {
+toextend() {
     local name=$1
     if [ -s ~/".$name" ] && [ ! -L ~/".$name" ]; then
         local extend=.extend.$name

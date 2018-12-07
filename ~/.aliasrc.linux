@@ -19,7 +19,7 @@ alias open="xdg-open"
 alias pause="read -t15 -n1 -r -p 'Press any key to continue...' key"
 
 # Empty the Trash
-function emptytrash() {
+emptytrash() {
     rm -rfv ~/.local/share/Trash/*
     rm -rfv ~/.Trash;
 }
