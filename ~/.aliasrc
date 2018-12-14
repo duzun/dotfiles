@@ -116,15 +116,13 @@ else
 fi
 
 alias du='du -ch'
-if sort --help | grep -- '--human' > /dev/null; then
-    alias dut='du -hsx * | sort -rh | head'
-else
-    alias dut='du -hsx * | sort -rn | head'
-fi
 alias du1='du -d 1'
 alias du0='du -d 0'
+# alias dut='du -hsx * | sort -rh | head' # See fs() function below
+alias dut='fs -h -x'
 
-# Add safety nets
+
+# Add safety nets:
 
 ## do not delete / or prompt if deleting more than 3 files at a time #
 if rm --help 2> /dev/null | grep -- '--preserve-root' > /dev/null;
@@ -546,7 +544,7 @@ mcd() {
     mkdir -p "$@" && cd "$_" || return $?
 }
 
-# Sort for find file
+# Short for <find file>
 f() {
     find "$PWD" -type 'f' -name "$@"
 }
@@ -668,30 +666,84 @@ overdel() {
 
 # Determine size of a file or total size of a directory
 fs() {
+    if [ "$1" = "--help" ]; then
+        cat << EOH
+Usage: fs [-s | -h [-<number>]] [-<du_options>] [<path> | <glob>]
+Determine size of a file or total size of a directory
+
+Options:
+    -s, --sort    Sort results by size
+    -h, --head    Show only first results, sorted by size
+
+You can also pass any \`du\` options before the <path> | <glob>,
+except '-sh', which are set anyways.
+
+Example:
+    fs
+        List file sizes for all files and folders in current folder
+    fs -s
+        List file sizes for all files and folders in current folder, sorted by size
+    fs -h -7
+        List top 7 files and folders in current folder, sorted by size
+    fs /var/log/nginx
+        Folder size
+    fs -- /var/log/nginx/*
+        List file sizes for all non-hidden files and folders in /var/log/nginx/
+    fs -x /tmp/
+        Folder size, skip directories on different file systems (see \`du --help\`)
+EOH
+        return 0
+    fi
+
+    if [ "$1" = "-s" ] || [ "$1" = "--sort" ]; then
+        shift
+        # Detect --human sort support
+        if sort --help | grep -- '--human' > /dev/null; then
+            fs "$@" | sort -rh
+        else
+            fs "$@" | sort -rn
+        fi
+        return $?
+    fi
+
     local arg
+    if [ "$1" = "-h" ] || [ "$1" = "--head" ] || [ "$1" = "--top" ]; then
+        shift
+        # -<number> arguments go to `head`, except '-0'
+        if [ "${1:0:1}" = "-" ] && (( -$1 > 0 )); then
+            arg="$1"
+            shift
+        fi
+        fs -s "$@" | head $arg
+        return $?
+    fi
+
+    # Detect --apparent-size support of `du`
     if du -b --exclude='*' /dev/null > /dev/null 2>&1; then
         arg=-sbh;
     else
         arg=-sh;
     fi
 
+    # Gather du options
+    while [ "${1:0:1}" = "-" ] && [ "$1" != "--" ]; do
+        arg="$arg $1"
+        shift
+    done
+    [ "$1" = "--" ] && shift
+
+    # We need a files list separator --
+    arg="$arg --"
+
+    # If no files arguments, assume all files in current folder
     if [ $# -eq 0 ]; then
-        if exists './*'; then
-            if exists '.[^.]*'; then
-                du $arg -- .[^.]* ./*;
-            else
-                du $arg -- ./*;
-            fi
-        else
-            if exists '.[^.]*'; then
-                du $arg -- .[^.]*;
-            else
-                du $arg;
-            fi
-        fi
-    else
-        du $arg -- "$@";
+        exists '.[^.]*' && arg="$arg .[^.]*"
+        exists '*' && arg="$arg *"
     fi
+
+    # `eval` used just for the sake of zsh, but an unwanted side-effect:
+    # `fs -- '*'` is the same as `fs -- *`, but it shouldn't!
+    eval "du $arg" "$@";
 }
 
 command -v filesize > /dev/null || alias filesize="wc -c <"
