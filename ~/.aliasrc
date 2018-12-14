@@ -696,6 +696,15 @@ fs() {
 
 command -v filesize > /dev/null || alias filesize="wc -c <"
 
+# File age (since last modification)
+filemage() {
+    local fm ts
+    ts=$(date "+%s")
+    if ! fm=$(stat -c '%Y' "$1" 2> /dev/null) || [ -z "$fm" ]; then return 1; fi
+
+    echo $(( ts - fm ))
+}
+
 # Convert a number to memory unit (K, M, G)
 mem_unit() {
     local sum=${1:-$(cat)}
