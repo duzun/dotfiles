@@ -1,3 +1,0 @@
-
-export EDITOR_PATH="/opt/sublime_text_3/sublime_text"
-export EDITOR_ARGS="-w"

@@ -11,10 +11,10 @@ toextend() {
         local extend=.extend.$name
         if [ -s ~/"$extend" ]; then
             [ -s ~/".$name.bak" ] && echo "Overwriting ~/.$name.bak"
-            mv ~/".$name" ~/".$name.bak"
+            mv -- ~/".$name" ~/".$name.bak"
         else
             # Old .profile becomes .extend.profile
-            mv ~/".$name" ~/"$extend"
+            mv -- ~/".$name" ~/"$extend"
 
             # Avoid recursive sourcing
             sed -ri "s/((^|^[^#]*\s)(\.|source)\s+(\~|\\\$HOME)\/$extend)/#\\1/" ~/$extend
@@ -70,4 +70,4 @@ fi
 
 "$p"/../init_git.sh
 
-[ ! -z "$_e" ] && [ "$_e" -eq "1" ] && shopt -u expand_aliases
+[ -n "$_e" ] && [ "$_e" -eq "1" ] && shopt -u expand_aliases

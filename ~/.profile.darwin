@@ -1,3 +1,0 @@
-
-export EDITOR_PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
-export EDITOR_ARGS="-w"

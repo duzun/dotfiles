@@ -1,3 +1,4 @@
+#!/bin/bash
 #######################
 # Functions & Aliases #
 #######################
@@ -36,7 +37,7 @@ ostype() {
 
 _os=$(ostype)
 
-# bash, but cool :-)
+# bash only, but cool :-)
 if_os () { [[ $OSTYPE == *$1* ]]; }
 if_nix () {
     case "$OSTYPE" in
@@ -58,8 +59,10 @@ shelltype() {
         local s;
         s=$(realpath /proc/$$/exe); # it's safer to check real processes' path
         if [ -n "$s" ] && [ "$s" != "/proc/$$/exe" ] && [ -e "$s" ]; then
+            # echo "${s##*/}"
             basename "$s"
         elif [ -n "$shell" ]; then
+            # echo "${shell##*/}"
             basename "$shell"
         elif [ -n "$SHELL" ]; then
             basename "$(realpath "$SHELL")"
@@ -98,9 +101,9 @@ alias l='ll -a'
 alias l.="ls -dh .*"
 
 ## Colorize the grep command output for ease of use (good for log files)##
-alias grep &>/dev/null || alias grep='grep --color=auto'
-alias egrep &>/dev/null || alias egrep='egrep --color=auto'
-alias egrep &>/dev/null || alias fgrep='fgrep --color=auto'
+alias grep  > /dev/null 2>&1 || alias grep='grep --color=auto'
+alias egrep > /dev/null 2>&1 || alias egrep='egrep --color=auto'
+alias egrep > /dev/null 2>&1 || alias fgrep='fgrep --color=auto'
 
 alias nocmt="grep -Ev '^(#|$)'" # grep no comment
 
@@ -293,7 +296,8 @@ exists() {
             if [ -e "$f" ] || [ -L "$f" ]; then return 0; fi
 
             # If $1 is a pattern, we have to expand it in zsh:
-            local g=$(setopt | grep nullglob)
+            local g
+            g=$(setopt | grep nullglob)
             setopt nullglob
             set -- ${~f} 2> /dev/null
             [ -z "$g" ] && setopt +o nullglob
@@ -483,7 +487,7 @@ command -v su > /dev/null || alias su="sudo -i"
 
 # reboot / halt / poweroff
 if [ "$UID" != "0" ]; then
-    alias reboot &>/dev/null || alias reboot='sudo /sbin/reboot'
+    alias reboot > /dev/null 2>&1 || alias reboot='sudo /sbin/reboot'
     alias poweroff='sudo /sbin/poweroff'
     alias halt='sudo /sbin/halt'
     alias shutdown='sudo /sbin/shutdown'
@@ -536,7 +540,7 @@ alias ....='cd ../../..'
 up() {
     local up;
     up=$(expr "$PWD" : "^\(.*$1[^/]*\)")
-    [ "x$up" = "x" ] || cd $up
+    [ "x$up" = "x" ] || cd "$up" || return 1
 }
 
 # Create directory and cd to it
@@ -836,6 +840,13 @@ translit() {
 }
 
 # ------------------------------------------------------------------------------
+lowercase() {
+    # echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/" # ACII only
+    # echo "${@,,}" # bash
+    echo "${@:-$(cat)}" | awk '{print tolower($0)}'
+}
+
+# ------------------------------------------------------------------------------
 # open-url some-file-from-windows.url
 open-url() {
     if [ $# -eq 0 ]; then
@@ -844,7 +855,7 @@ open-url() {
     fi
 
     _url="${1}"
-    _u=$(cat "$_url" | grep '^URL=')
+    _u=$(grep '^URL=' "$_url")
 
     if [ -z "$_u" ]; then
         echo "open-url: Wrong file format"
@@ -913,7 +924,7 @@ getcertnames() {
 # ------------------------------------------------------------------------------
 # https://stackoverflow.com/a/38463476/1242333
 getspfranges() {
-    domainsToDig=$(dig @8.8.8.8 _spf.$1 TXT +short | \
+    domainsToDig=$(dig @8.8.8.8 "_spf.$1" TXT +short | \
     sed \
         -e 's/"v=spf1//' \
         -e 's/ ~all"//' \
@@ -995,7 +1006,7 @@ alias_completion() {
     eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
 }
 
-if command -v complete > /dev/null;
+if [[ "$-" == *i* ]] && command -v complete > /dev/null;
 then
     if command -v _completion_loader > /dev/null;
     then
@@ -1043,9 +1054,285 @@ then
     # alias_completion ccurl
 fi
 
-alias .update="( cd '$_dotfiles' && git pull --rebase --recurse-submodules) && . '$_dotfiles/.profile'"
-alias .source=". '$_dotfiles/.profile'"
+# ------------------------------------------------------------------------------
+# Add to path npm's bin folder
+npmbin() {
+    local npmbin;
+    npmbin=${PWD:-$(pwd)}/node_modules/.bin;
+    add_path "$npmbin" && echo "$npmbin";
+    return $?;
+}
 
+
+# Add to path composer's bin folder
+composerbin() {
+    local composerbin;
+
+    # Global
+    composerbin=~/.composer/vendor/bin;
+    add_path "$composerbin" # && echo "$composerbin";
+
+    # Local
+    composerbin=${PWD:-$(pwd)}/vendor/bin;
+    add_path "$composerbin" && echo "$composerbin";
+    return $?;
+}
+
+# ------------------------------------------------------------------------------
+_is_sourced() {
+    _is_sourced="$1"
+    local _rc="$2"
+
+    grep -q "^[^#]*. $_is_sourced"          "$_rc" || \
+    grep -q "^[^#]*source $_is_sourced"     "$_rc" || \
+    grep -q "^[^#]*. '$_is_sourced'"        "$_rc" || \
+    grep -q "^[^#]*source '$_is_sourced'"   "$_rc" || \
+    grep -q "^[^#]*. \"$_is_sourced\""      "$_rc" || \
+    grep -q "^[^#]*source \"$_is_sourced\"" "$_rc" && \
+    return
+
+    _is_sourced=
+    return 1
+}
+
+is_sourced() {
+    local fn="$1"
+    local _rc="$2"
+
+    if [ -z "$_rc" ]; then
+        _shell=$(shelltype)
+        _rc=~/".${_shell}rc";
+    fi
+
+    [ -e "$_rc" ] || return 2
+
+    local _dn _fn
+    _dn="$(dirname "$fn")"
+    if  [ "$_dn" = "~" ] || \
+        [ "$_dn" = "\$HOME" ] || \
+        [ "$_dn" = "$HOME" ]
+    then
+        _fn="$(basename "$fn")"
+        _is_sourced      "~/$_fn" "$_rc" || \
+        _is_sourced "\$HOME/$_fn" "$_rc" || \
+        _is_sourced  "$HOME/$_fn" "$_rc" || \
+        return 1
+    else
+        _is_sourced "$fn" "$_rc" || return 1
+    fi
+}
+
+is_dotfiles_sources() {
+    local _rc="$1"
+    local fn=~/.source
+
+    if [ -z "$_rc" ]; then
+        _shell=$(shelltype)
+        _rc=~/".${_shell}rc";
+    fi
+
+    [ "$(readlink "$fn")" = "$_dotfiles/source" ] && is_sourced '~/.source' "$_rc"  || \
+    is_sourced "$_dotfiles/source" "$_rc" || \
+    is_sourced "\$_dotfiles/source" "$_rc" || \
+    return 1
+}
+
+# ------------------------------------------------------------------------------
+# Init git config.
+# Usage: init_git [-f]
+init_git() {
+    if ! command -v git > /dev/null ; then
+        echo "Looks like git is not installed"
+        return 1
+    fi
+
+    # [ -n "$BASH" ] && ! command -v __git_ps1 > /dev/null && [ ! -e ~/.git-prompt.sh ] && \
+    # curl -L -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+
+    local _name _value _default _section _username _pv _dvb
+    local gfg="git config --global"
+
+    _force=$(echo "$@" | grep -- '-f')
+    grep -v '^;' "$_dotfiles/.gitconfig" | while read -r ln; do
+        ln="${ln##*( )}"
+        if [[ "${ln:0:1}" == "[" ]]; then
+            ln=$(echo "${ln:1:${#ln}-2}" | tr -s '\ "' '.')
+            _section=${ln%%.}
+            # echo [$_section]
+        else
+            _name=${ln%%=*}
+            _value=${ln:${#_name}+1}
+            _value=${_value/# /}
+            _name=${_name/% /}
+            # echo $_section.$_name=$_value
+            $gfg "$_section.$_name" "$_value"
+        fi
+    done
+
+    echo ""
+    echo "$gfg:"
+    _section=user
+    _username=$(whoami)
+    _value=
+    for _name in name email username; do
+        _pv=$_value
+        _value=$($gfg "$_section.$_name");
+        _default=$_value;
+
+        # Try to get a default value for missing git config
+        if [ -z "$_default" ] ; then
+            if [[ "$_name" == "name" ]]; then
+                _default=$(getent passwd "$_username" | cut -d: -f5 | cut -d, -f1)
+            elif [[ "$_name" == "email" ]]; then
+                _default="$_username@$(hostname)"
+            elif [[ "$_name" == "username" ]]; then
+                _default=$_username
+                if [[ "$_default" == "root" ]] || [[ "$_default" == "user" ]]; then
+                    if [ -n "$_pv" ]; then
+                        _default=${_pv%%\@*}
+                    fi
+                fi
+            fi
+        fi
+
+        _dvb=" ($_default)";
+        [ -z "$_default" ] && _dvb=;
+
+        if [ -z "$_value" ] || [ -n "$_force" ] ; then
+            read -r -p "    $_section.$_name$_dvb:" v;
+            [ -z "$v" ] && [ -n "$_default" ] && v=$_default
+            if [ -n "$v" ]; then
+                $gfg "$_section.$_name" "$v";
+                _value=$v;
+            fi
+        else
+            echo "    $_section.$_name: $_value";
+        fi
+    done
+
+    _name=credential.helper
+    $gfg $_name > /dev/null
+    if [ -n "$_os" ] && [[ $? != 0 || "$_name" == "store" ]]; then
+        case $_os in
+            linux)
+                # Try to use KWallet if available
+                _ask=$(command -v ksshaskpass) > /dev/null && \
+                $gfg core.askpass "$_ask"
+
+                # Try to use Gnome-Keyring if available
+                command -v gnome-keyring > /dev/null && \
+                $gfg $_name gnome-keyring;
+            ;;
+            osx)
+                $gfg $_name osxkeychain;
+            ;;
+            windows)
+                $gfg $_name wincred;
+            ;;
+        esac
+    fi
+}
+
+init_dotfiles() {
+
+    # A method to move existing .profile to .extend.profile or .profile.bak
+    _toextend() {
+        local name=$1
+        if [ -s ~/".$name" ] && [ ! -L ~/".$name" ]; then
+            local extend=.extend.$name
+            if [ -s ~/"$extend" ]; then
+                [ -s ~/".$name.bak" ] && echo "Overwriting ~/.$name.bak"
+                mv -- ~/".$name" ~/".$name.bak"
+            else
+                # Old .profile becomes .extend.profile
+                mv -- ~/".$name" ~/"$extend" && \
+
+                # Avoid recursive sourcing
+                sed -ri "s/((^|^[^#]*\s)(\.|source)\s+(\~|\\\$HOME)\/$extend)/#\\1/" ~/"$extend"
+            fi
+        fi
+    }
+
+    local i _i _rc _pc
+
+    ln -sfT "$_dotfiles/source" ~/.source
+
+    # Try to take care of sourcing .source automatically
+    _shell=$(shelltype)
+    _rc=~/".${_shell}rc";
+    _pc=~/.profile
+    if [ -n "$_shell" ] && [ -f "$_rc" ]; then
+        if is_sourced "~/.profile" "$_rc"; then
+            _i="$_pc"
+        else
+            _i="$_rc"
+        fi
+
+        if is_dotfiles_sources "$_rc"; then
+            i=${_is_sourced:-"$_dotfiles/source"}
+            echo "'$i' sourced in '$_rc'"
+        elif [ "$_i" = "$_pc" ] && is_dotfiles_sources "$_pc"; then
+            i=${_is_sourced:-"$_dotfiles/source"}
+            echo "'$i' sourced in '$_pc'"
+        else
+            i=~/.source
+            if [ "$(readlink "$i")" = "$_dotfiles/source" ]; then
+                i="~/.source"
+            else
+                i="$_dotfiles/source"
+            fi
+
+            echo "Adding '. $i' to $_i ..."
+            echo "" >> "$_i"
+            echo ". $i" >> "$_i"
+        fi
+    fi
+
+    # _toextend profile && \
+    # ln -sf "$_dotfiles/.profile" ~/
+
+    _toextend aliasrc && \
+    ln -sf "$_dotfiles/.aliasrc" ~/
+
+    ln -s "$_dotfiles/.gitignore" ~/
+    ln -s "$_dotfiles/.curlrc" ~/
+    ln -s "$_dotfiles/.vimrc" ~/
+
+    # unset -f _toextend
+
+    exists "$_dotfiles/.extend.*" && for _i in "$_dotfiles"/.extend.*; do
+        i=$(basename "$_i")
+        _mark="#dotfiles: $i";
+        if [ -e ~/"$i" ] && grep "$_mark" ~/"$i" > /dev/null; then
+            echo "$i not updated"
+        else
+            echo "Updating $i ..."
+            {
+                echo "";
+                cat "$_i";
+                echo "";
+                echo "$_mark";
+            } >> ~/"$i";
+        fi
+    done
+
+    if command -v git > /dev/null ; then
+        echo -n "Init git?";
+        read -p " [Y/n]" -n 1 -r;
+        echo "";
+        if [[ "${REPLY:-Y}" =~ ^[Yy]?$ ]]; then
+            init_git "$@" # -f for forced update of the config, even when set
+        fi
+    fi
+
+    # [ -n "$_e" ] && [ "$_e" -eq "1" ] && shopt -u expand_aliases
+}
+
+# ------------------------------------------------------------------------------
+alias .update="( cd '$_dotfiles' && git pull --rebase --recurse-submodules) && . '$_dotfiles/source'"
+alias .source=". '$_dotfiles/source'"
+
+# ------------------------------------------------------------------------------
 [ -n "$_shell" ] && [ -f "$_dotfiles/.aliasrc.$_shell" ] && . "$_dotfiles/.aliasrc.$_shell";
 [ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;

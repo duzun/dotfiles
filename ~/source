@@ -1,0 +1,92 @@
+#!/bin/bash
+###################################
+# DUzun's dotfiles main source    #
+# @version 2.0.0                  #
+# @author Dumitru Uzun (DUzun.Me) #
+###################################
+
+# ------------------------------------------------------------------------------
+# echo .: ${BASH_SOURCE[@]}
+# if [ -z "$BASH_SOURCE" ]; then local BASH_SOURCE=$_; fi
+
+_profile=${BASH_SOURCE:-$0}
+# ------------------------------------------------------------------------------
+if ! command -v realpath > /dev/null; then
+    _realpath() {
+        local _l _d
+        _l=$1
+        if [ -L "$_l" ]; then
+            _l=$(readlink "$_l") || return $?
+            # If symlink is relative:
+            if [ "${_l:0:1}" != "/" ]; then
+                _d=$(dirname "$1")
+                [ "$_d" = "." ] && _d=${PWD:-$(pwd)}
+                [ "$_d" != "." ] && [ -n "$_d" ] && _l="$_d/$_l"
+            fi
+        fi
+        echo "$_l"
+        [ -e "$_l" ]
+    }
+
+    . "$(_realpath "$_profile")/../src/realpath/.realpath"
+fi
+
+# ------------------------------------------------------------------------------
+_profile=$(realpath "$_profile")
+_dotfiles=$(dirname "$_profile")
+
+# ------------------------------------------------------------------------------
+[ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
+
+# ------------------------------------------------------------------------------
+# Set the prompt and shell behaviour
+. "$_dotfiles/prompt";
+
+# ------------------------------------------------------------------------------
+export NVM_DIR=~/.nvm
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+
+    # This loads nvm
+    . "$NVM_DIR/nvm.sh"
+
+    # When there is no node.js in the environment,
+    # load it with nvm
+    command -v node > /dev/null || nvm use node
+fi
+
+# ------------------------------------------------------------------------------
+# Custom .profile
+[ -f ~/.extend.source ] && . ~/.extend.source;
+
+# ------------------------------------------------------------------------------
+if [ -z "$EDITOR" ] && [ -n "$EDITOR_PATH" ] && [ -x "$EDITOR_PATH" ]; then
+    export EDITOR="$EDITOR_PATH $EDITOR_ARGS";
+fi
+
+# ------------------------------------------------------------------------------
+composerbin;
+npmbin;
+
+# ------------------------------------------------------------------------------
+if [ $# -ne 0 ]; then
+    _cmd="$1"
+    shift
+    case "$_cmd" in
+        init)
+            init_dotfiles "$@"
+            exit $?
+        ;;
+        init_git)
+            init_git "$@"
+            exit $?
+        ;;
+        update)
+            .update
+            exit $?
+        ;;
+        *)
+            echo_error "Unknown command '$_cmd'";
+            exit 1
+        ;;
+    esac
+fi

@@ -1,4 +1,7 @@
 
+export EDITOR_PATH="/opt/sublime_text_3/sublime_text"
+export EDITOR_ARGS="-w"
+
 if command -v xset > /dev/null;
 then
     # Disable beep
@@ -25,7 +28,7 @@ emptytrash() {
 }
 
 # for systemd
-systemctl=`command -v systemctl`
+systemctl=$(command -v systemctl)
 if [ -n "$systemctl" ]; then
     alias ss="systemctl"
     alias ssv="systemctl status"
@@ -37,7 +40,7 @@ if [ -n "$systemctl" ]; then
 fi
 
 # for Manjaro
-yaourt=`command -v yaourt`
+yaourt=$(command -v yaourt)
 if [ -n "$yaourt" ]; then
     alias y="yaourt"                  # search
     alias yq="yaourt --noconfirm"     # search +silent
