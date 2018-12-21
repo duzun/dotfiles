@@ -101,9 +101,11 @@ alias l='ll -a'
 alias l.="ls -dh .*"
 
 ## Colorize the grep command output for ease of use (good for log files)##
-alias grep  > /dev/null 2>&1 || alias grep='grep --color=auto'
-alias egrep > /dev/null 2>&1 || alias egrep='egrep --color=auto'
-alias egrep > /dev/null 2>&1 || alias fgrep='fgrep --color=auto'
+if echo | grep --color 2> /dev/null; then
+    alias grep  > /dev/null 2>&1 || alias grep='grep --color=auto'
+    alias egrep > /dev/null 2>&1 || alias egrep='egrep --color=auto'
+    alias egrep > /dev/null 2>&1 || alias fgrep='fgrep --color=auto'
+fi
 
 alias nocmt="grep -Ev '^(#|$)'" # grep no comment
 
@@ -329,7 +331,7 @@ alias ping='ping -c 5'
 alias netports="netstat -tulapn"
 
 # grep process:
-alias psgrep='ps aux | head -n1; ps aux | grep -v "\bgrep\b" | grep --color -i'
+alias psgrep='ps aux | head -n1; ps aux | grep -v "\bgrep\b" | grep -i'
 
 ## Get cpu info ##
 if command -v lscpu > /dev/null;
