@@ -7,13 +7,13 @@ My dotfiles (Linux, OSX &amp; Windows) for bash &amp; zsh on PC &amp; server
 After you've got `git` on your system:
 
 ```sh
-git clone --recurse-submodules https://github.com/duzun/dotfiles.git ~/.dotfiles && ~/.dotfiles/init.sh 
+git clone --recurse-submodules https://github.com/duzun/dotfiles.git ~/.dotfiles && ~/.dotfiles/~/source init 
 ```
 
 Install without `git`:
 
 ```sh
-curl -L -o ~/dotfiles.zip "https://github.com/duzun/dotfiles/archive/master.zip" && unzip ~/dotfiles.zip -d ~ && mv ~/dotfiles-master ~/.dotfiles && ~/.dotfiles/init.sh
+curl -L -o ~/dotfiles.zip "https://github.com/duzun/dotfiles/archive/master.zip" && unzip ~/dotfiles.zip -d ~ && mv ~/dotfiles-master ~/.dotfiles && ~/.dotfiles/~/source init
 
 ```
 
