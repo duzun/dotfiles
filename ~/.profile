@@ -35,6 +35,7 @@ _dotfiles=$(dirname "$_profile")
 dotfiles_migrate() {
     if [ -L ~/.profile ] && [ "$(realpath ~/.profile)" = "$_dotfiles/.profile" ]; then
         echo "Migrating ~/.profile to ~/.source ..."
+        ln -sfT "$_dotfiles/source" ~/.source && \
         rm -f -- ~/.profile && \
         cat << EOH > ~/.profile
 # ------------------------------------------------------------------------------
