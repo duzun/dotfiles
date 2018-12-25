@@ -1008,8 +1008,46 @@ alias_completion() {
     eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
 }
 
-if [[ "$-" == *i* ]] && command -v complete > /dev/null;
-then
+_source_completion_loader() {
+    command -v complete > /dev/null || return 1;
+
+    local _f _c
+
+    if ! command -v _completion_loader > /dev/null;
+    then
+        _f=/usr/share/bash-completion/bash_completion
+        [ -f "$_f" ] && . "$_f"
+    fi
+
+    # complete-alias requires bash-completion
+    if command -v _completion_loader > /dev/null && \
+     ! command -v _complete_alias > /dev/null;
+    then
+        _c="$_dotfiles/../complete-alias"
+        _f="$_c/bash_completion.sh"
+        if [ ! -f "$_f" ] && command -v git > /dev/null; then
+            if [ -e "$_c/.git" ]; then (
+                cd "$_c" && \
+                git checkout -f . && \
+                git pull --rebase
+            )
+            else (
+                cd "$_dotfiles/.." && \
+                git submodule init && \
+                git submodule update
+            )
+            fi
+        fi
+
+        [ -f "$_f" ] && . "$_f"
+    fi
+}
+
+_init_complete() {
+    command -v complete > /dev/null || return 1;
+
+    _source_completion_loader;
+
     if command -v _completion_loader > /dev/null;
     then
         _completion_loader git
@@ -1054,7 +1092,7 @@ then
 
     alias_completion mcd mkdir
     # alias_completion ccurl
-fi
+}
 
 # ------------------------------------------------------------------------------
 # Add to path npm's bin folder
