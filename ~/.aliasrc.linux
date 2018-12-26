@@ -27,19 +27,51 @@ emptytrash() {
     rm -rfv ~/.Trash;
 }
 
+_sudo=
+[ "$(id -u)" -ne "0" ] && _sudo="sudo "
+
 # for systemd
 systemctl=$(command -v systemctl)
 if [ -n "$systemctl" ]; then
     alias ss="systemctl"
     alias ssv="systemctl status"
-    alias sss="systemctl start"
-    alias sst="systemctl stop"
-    alias ssl="systemctl reload"
-    alias ssr="systemctl restart"
-    alias sse="systemctl enable"
+    alias sss="${_sudo}systemctl start"
+    alias sst="${_sudo}systemctl stop"
+    alias ssl="${_sudo}systemctl reload"
+    alias ssr="${_sudo}systemctl restart"
+    alias sse="${_sudo}systemctl enable"
 fi
 
 # for Manjaro
+pacman=$(command -v pacman)
+if [ -n "$pacman" ]; then
+    alias pcman="open https://www.archlinux.org/pacman/pacman.8.html"
+    alias pS="pacman -S"              # sync: install | update
+    alias pQ="pacman -Q"              # query: list files | packaegs
+    alias pR="${_sudo}pacman -R"      # remove: uninstall
+
+    # Search & List
+    alias pc="pacman -Ss"              # [<search>] search
+    alias pcl="pacman -Sl"             # [<repo>] # list available packages
+    alias pcli="pacman -Q"             # list installed packages
+    alias pcliq="pacman -Qq"           # list installed packages quietly (just names)
+
+    # Update & Upgrade
+    alias pcu="${_sudo}pacman -Syu"     # update & upgrade
+    alias pcuq="${_sudo}pacman -Syuq"   # update & upgrade quiet
+    alias pcua="${_sudo}pacman -Syyu"   # update all & upgrade
+    alias pcuaq="${_sudo}pacman -Syyuq" # update all & upgrade quiet
+
+    # Install
+    alias pci="${_sudo}pacman -S"       # <pkg_name> # install
+    alias pciq="${_sudo}pacman -Sq"     # <pkg_name> # install quiet
+
+    # Remove
+    alias pcr="${_sudo}pacman -Rsn"     # <pkg_name> # uninstall
+    alias pcrf="${_sudo}pacman -Rsnc"   # <pkg_name> # uninstall cascade: Remove all target packages, as well as all packages that depend on one or more target packages.
+fi
+
+# for Manajaro with AUR
 yaourt=$(command -v yaourt)
 if [ -n "$yaourt" ]; then
     alias y="yaourt"                  # search
@@ -54,3 +86,4 @@ if [ -n "$yaourt" ]; then
     alias yrf="yaourt -Rsn"           # <pkg_name> # uninstall completely: configs and dependencies
     alias yl="yaourt -Qm"             # list installed packages
 fi
+
