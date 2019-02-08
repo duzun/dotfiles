@@ -11,6 +11,7 @@ then
     alias screenoff="xset dpms force off"
 fi
 
+alias glxvendor='glxinfo|grep -i direct\ rendering\\\|vendor\ string'
 
 alias www="cd /var/www/"
 alias proj="cd /var/www/projects"
@@ -57,18 +58,20 @@ if [ -n "$pacman" ]; then
     alias pcliq="pacman -Qq"           # list installed packages quietly (just names)
 
     # Update & Upgrade
-    alias pcu="${_sudo}pacman -Syu"      # update & upgrade
-    alias pcuq="${_sudo}pacman -Syuuq"   # update & upgrade quiet
-    alias pcua="${_sudo}pacman -Syyuu"   # update all & upgrade
-    alias pcuaq="${_sudo}pacman -Syyuuq" # update all & upgrade quiet
+    alias pcu="${_sudo}pacman -Syu"    # update & upgrade
+    alias pcuq="pcu --noconfirm"       # update & upgrade quiet
+    alias pcua="${_sudo}pacman -Syyuu" # update all & upgrade
+    alias pcuaq="pcua --noconfirm"     # update all & upgrade quiet
 
-    # Install
-    alias pci="${_sudo}pacman -S"       # <pkg_name> # install
-    alias pciq="${_sudo}pacman -Sq"     # <pkg_name> # install quiet
+                                       # Install
+    alias pci="${_sudo}pacman -S"      # <pkg_name> # install
+    alias pciq="pci --noconfirm"       # <pkg_name> # install quiet
 
-    # Remove
-    alias pcr="${_sudo}pacman -Rsn"     # <pkg_name> # uninstall
-    alias pcrf="${_sudo}pacman -Rsnc"   # <pkg_name> # uninstall cascade: Remove all target packages, as well as all packages that depend on one or more target packages.
+                                       # Remove
+    alias pcr="${_sudo}pacman -Rsn"    # <pkg_name> # uninstall
+    alias pcrq="pcr --noconfirm"       # <pkg_name> # uninstall
+    alias pcrf="${_sudo}pacman -Rsnc"  # <pkg_name> # uninstall cascade: Remove all target packages, as well as all packages that depend on one or more target packages.
+    alias pcrfq="pcrf --noconfirm"     # <pkg_name> # uninstall cascade: Remove all target packages, as well as all packages that depend on one or more target packages.
 fi
 
 # for Manajaro with AUR
@@ -86,4 +89,3 @@ if [ -n "$yaourt" ]; then
     alias yrf="yaourt -Rsn"           # <pkg_name> # uninstall completely: configs and dependencies
     alias yl="yaourt -Qm"             # list installed packages
 fi
-

@@ -152,6 +152,7 @@ ln --help 2> /dev/null | grep -q -- '--interactive' && alias ln='ln -i'
 alias g="git"
 alias gva="git status"
 alias gv="gva ."
+alias gvs="gv -s"
 alias gda="git diff"
 alias gdan="gda --name-status"
 alias gd="gda ."
@@ -877,6 +878,24 @@ open-url() {
     eval "$_o '$_u'"
 }
 # ------------------------------------------------------------------------------
+# Convert a git remote to corresponding HTTP(S) URL
+# Example: git@github.com:duzun/dotfiles.git -> https://git@github.com/duzun/dotfiles
+git2url() {
+    local url="${1:-$(cat)}"
+
+    case $url in
+        *://*) ;;
+        *@*:*)
+            url="${url%.git}"
+            url="${url#*@}"
+            url="$(sed 's/:/\//' <<<"$url")"
+            url="${2:-https}://${url}"
+        ;;
+    esac
+    echo "$url"
+}
+
+# ------------------------------------------------------------------------------
 # Create a data URL from a file
 dataurl() {
     local mimeType;
@@ -1366,8 +1385,10 @@ init_dotfiles() {
 }
 
 # ------------------------------------------------------------------------------
-alias .update="( cd '$_dotfiles' && git pull --rebase --recurse-submodules) && . '$_dotfiles/source'"
+alias .cd="cd '$_dotfiles/..'"
 alias .source=". '$_dotfiles/source'"
+alias .update="( cd '$(dirname "$_dotfiles")' && git pull --rebase --recurse-submodules) && .source"
+alias .open_git="open '$(git --git-dir=$_dotfiles/../.git remote get-url origin | git2url)'"
 
 # ------------------------------------------------------------------------------
 [ -n "$_shell" ] && [ -f "$_dotfiles/.aliasrc.$_shell" ] && . "$_dotfiles/.aliasrc.$_shell";
