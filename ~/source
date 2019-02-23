@@ -28,7 +28,8 @@ if ! command -v realpath > /dev/null; then
         [ -e "$_l" ]
     }
 
-    . "$(_realpath "$_profile")/../src/realpath/.realpath"
+    _dotfiles=$(dirname "$(_realpath "$_profile")")
+    . "$_dotfiles/../src/realpath/.realpath"
 fi
 
 # ------------------------------------------------------------------------------
@@ -43,18 +44,6 @@ _dotfiles=$(dirname "$_profile")
 . "$_dotfiles/prompt";
 
 # ------------------------------------------------------------------------------
-export NVM_DIR=~/.nvm
-if [ -s "$NVM_DIR/nvm.sh" ]; then
-
-    # This loads nvm
-    . "$NVM_DIR/nvm.sh"
-
-    # When there is no node.js in the environment,
-    # load it with nvm
-    command -v node > /dev/null || nvm use node
-fi
-
-# ------------------------------------------------------------------------------
 # Custom .profile
 [ -f ~/.extend.source ] && . ~/.extend.source;
 
@@ -64,11 +53,26 @@ if [ -z "$EDITOR" ] && [ -n "$EDITOR_PATH" ] && [ -x "$EDITOR_PATH" ]; then
 fi
 
 # ------------------------------------------------------------------------------
-composerbin;
-npmbin;
+if [[ $- = *i* ]]; then
+    if [ -z "$NVM_DIR" ]; then
+        export NVM_DIR=~/.nvm
+        if [ -s "$NVM_DIR/nvm.sh" ]; then
+
+            # This loads nvm
+            . "$NVM_DIR/nvm.sh"
+
+            # When there is no node.js in the environment,
+            # load it with nvm
+            command -v node > /dev/null || nvm use node
+        fi
+    fi
+
+    composerbin;
+    npmbin;
+fi
 
 # ------------------------------------------------------------------------------
-if [ $# -ne 0 ]; then
+if [ $# -ne 0 ] && [ -z "${BASH_SOURCE[*]}" ] && [ "$(basename "$0")" != "Xsession" ]; then
     _cmd="$1"
     shift
     case "$_cmd" in
