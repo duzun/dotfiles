@@ -652,7 +652,7 @@ randtext() {
 # Open editor (no wait)
 edit() {
     if [ -f "$EDITOR_PATH" ]; then
-        command $EDITOR_PATH $EDITOR_ARGS "$@";
+        command "$EDITOR_PATH" $EDITOR_ARGS "$@";
     else
         echo "Editor not found (\$EDITOR_PATH='$EDITOR_PATH')";
         return 255;
@@ -661,13 +661,13 @@ edit() {
 
 # Overwrite contents and then remove file
 overdel() {
-    p=$(realpath "$1")
+    p="$(realpath "$1")"
     find "$p" -type 'f' | while read -r i; do
         # s=`du -sb "$i" | head -1 | awk '{print $1}'`;
         s=$(wc -c < "$i");
         echo "$s > $i";
         head -c "$s" < /dev/urandom > "$i";
-        rm -rf "$i";
+        rm -rf -- "$i";
     done;
 }
 
@@ -1385,10 +1385,16 @@ init_dotfiles() {
 }
 
 # ------------------------------------------------------------------------------
+dotfiles_url() {
+    ( git --git-dir="$_dotfiles/../.git" remote get-url origin 2> /dev/null || \
+    git --git-dir="$_dotfiles/../.git" config --get remote.origin.url ) | git2url
+}
+
+# ------------------------------------------------------------------------------
 alias .cd="cd '$_dotfiles/..'"
 alias .source=". '$_dotfiles/source'"
 alias .update="( cd '$(dirname "$_dotfiles")' && git pull --rebase --recurse-submodules) && .source"
-alias .open_git="open '$(git --git-dir=$_dotfiles/../.git remote get-url origin | git2url)'"
+alias .open_git="open \"\$(dotfiles_url)\""
 
 # ------------------------------------------------------------------------------
 [ -n "$_shell" ] && [ -f "$_dotfiles/.aliasrc.$_shell" ] && . "$_dotfiles/.aliasrc.$_shell";
