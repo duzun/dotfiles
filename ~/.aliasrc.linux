@@ -36,11 +36,14 @@ systemctl=$(command -v systemctl)
 if [ -n "$systemctl" ]; then
     # alias ss="systemctl"
     alias ssv="systemctl status"
-    alias sss="${_sudo}systemctl start"
-    alias sst="${_sudo}systemctl stop"
-    alias ssl="${_sudo}systemctl reload"
-    alias ssr="${_sudo}systemctl restart"
-    alias sse="${_sudo}systemctl enable"
+    alias sss="${_sudo}${systemctl} start"
+    alias sst="${_sudo}${systemctl} stop"
+    alias ssl="${_sudo}${systemctl} reload"
+    alias ssr="${_sudo}${systemctl} restart"
+    alias sse="${_sudo}${systemctl} enable"
+    alias ssls="$systemctl list-unit-files"
+    alias sslse="$systemctl list-unit-files --state=enabled"
+    alias sslsd="$systemctl list-unit-files --state=disabled"
 fi
 
 # for Manjaro

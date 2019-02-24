@@ -334,6 +334,22 @@ alias netports="netstat -tulapn"
 # grep process:
 alias psgrep='ps aux | head -n1; ps aux | grep -v "\bgrep\b" | grep -i'
 
+# Wait for a process to end by its PID
+wait_pid() {
+    local pid=$1
+    local interval="${2:-1}"
+    while kill -0 "$pid" &> /dev/null; do sleep $interval; done
+}
+
+# Wait for a process to end by its name/path
+wait_proc() {
+    local pid
+    pid=$(pidof "$1") || return $?
+    shift
+    echo "PID $pid"
+    wait_pid "$pid" "$@"
+}
+
 ## Get cpu info ##
 if command -v lscpu > /dev/null;
 then
