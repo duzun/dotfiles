@@ -66,18 +66,23 @@ if [ -n "$pacman" ]; then
     alias pcua="${_sudo}pacman -Syyuu" # update all & upgrade
     alias pcuaq="pcua --noconfirm"     # update all & upgrade quiet
 
-                                       # Install
+    # Install
     alias pci="${_sudo}pacman -S"      # <pkg_name> # install
     alias pciq="pci --noconfirm"       # <pkg_name> # install quiet
 
-                                       # Remove
+    # Remove
     alias pcr="${_sudo}pacman -Rsn"    # <pkg_name> # uninstall
     alias pcrq="pcr --noconfirm"       # <pkg_name> # uninstall
     alias pcrf="${_sudo}pacman -Rsnc"  # <pkg_name> # uninstall cascade: Remove all target packages, as well as all packages that depend on one or more target packages.
     alias pcrfq="pcrf --noconfirm"     # <pkg_name> # uninstall cascade: Remove all target packages, as well as all packages that depend on one or more target packages.
+
+    # Cache clean
+    alias pcc="${_sudo}pacman -Sc"     # remove all the cached packages that are not currently installed, and the unused sync database
+    alias pccq="pcc --noconfirm"
+    alias pcca="${_sudo}pacman -Scc"   # remove all files from the cache, use the clean switch twice, this is the most aggressive approach and will leave nothing in the cache folder
 fi
 
-# for Manajaro with AUR
+# for Manajaro with AUR (consider using yay)
 yaourt=$(command -v yaourt)
 if [ -n "$yaourt" ]; then
     alias y="yaourt"                  # search
