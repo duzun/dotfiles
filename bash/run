@@ -1,0 +1,10 @@
+#!/bin/sh
+
+_me=$(realpath "$0")
+_dir=$(dirname "$_me")
+
+if [ "$(docker images -q bash > /dev/null)" = "" ]; then
+    docker build -t bash "$_dir"
+fi
+
+docker run -it --rm -v "$_dir/../:/opt/dotfiles" -w /opt/dotfiles --name bash bash "$@"
