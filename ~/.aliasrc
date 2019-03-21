@@ -169,13 +169,13 @@ alias gut="gu --tags"
 alias guf="gu -f"
 alias gl="git pull"
 alias gls="gl --rebase"
+alias glo="gl origin"
 alias gs="git rebase"
 alias gsi="gs -i"
 alias gss="gs --skip"
 alias gsc="gs --continue"
 alias gsa="gs --abort"
-alias glo="gl origin"
-alias go="git checkout"
+alias gh="git checkout"
 alias ge="git merge"
 alias gr="git remote"
 alias gb="git branch"
@@ -1090,7 +1090,7 @@ _init_complete() {
     fi
 
     # alias_completion g;
-    _ga=(gd gb go gs gg gr ge);
+    _ga=(gd gb gh gs gg gr ge);
 
     # Enable completion for aliases
     if command -v __git_complete > /dev/null;
