@@ -82,3 +82,6 @@ if command -v shopt > /dev/null; then
     # Append all commands to the history file; don't overwrite it at the start of every new session
     shopt -s histappend
 fi
+
+# Use vi keybindings
+# set -o vi

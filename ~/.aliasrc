@@ -95,10 +95,17 @@ elif ls -G -d . >/dev/null 2>&1; then
     alias ls='ls -G'  # BSD/OS X
 fi
 
-alias la="ls -ah"
-alias ll="ls -lh"
+alias la="ls -ahF"
+alias ll="ls -lhF"
 alias l='ll -a'
 alias l.="ls -dh .*"
+
+alias more="less -MNE~"
+
+# Recognize "more" typos
+alias mroe=more
+alias moer=more
+alias mreo=more
 
 ## Colorize the grep command output for ease of use (good for log files)##
 if echo | grep --color 2> /dev/null; then
@@ -863,6 +870,22 @@ lowercase() {
     # echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/" # ACII only
     # echo "${@,,}" # bash
     echo "${@:-$(cat)}" | awk '{print tolower($0)}'
+}
+
+# ------------------------------------------------------------------------------
+# Strip whitespace (or other characters) from the beginning and end of a string
+# eg. echo "  x " | trim          -> "x"
+# eg. echo "..x." | trim '.'      -> "x"
+# eg. echo ".,x.," | trim '.' ',' -> ",x."
+trim() {
+    local l r
+    if [ $# -eq 0 ]; then
+        sed -r 's/^[[:space:]]*//g; s/[[:space:]]*$//g'
+    else
+        l=${1}
+        r=${2:-$1}
+        sed -r "s/^[$l]*//g; s/[$r]*\$//g"
+    fi
 }
 
 # ------------------------------------------------------------------------------
