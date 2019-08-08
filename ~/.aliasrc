@@ -169,6 +169,8 @@ alias gdo="gdao ."
 alias ga="git add"
 alias gap="ga -p"
 alias gaa="ga --all"
+alias guna="git rm --cached" # unadd
+alias gunaa="git rm -r --cached ." # unadd all
 alias gc="git commit"
 alias gcm="gc -m"
 alias gu="git push"
@@ -198,7 +200,12 @@ alias gw^^="gw HEAD~2"
 alias gw^^^="gw HEAD~3"
 alias gw^^^^="gw HEAD~4"
 alias gfg="git config --global"
+alias gc_counts="git shortlog -s | sort -k1 -nr"
+alias gc_total="git rev-list --all --count"
 
+# `git commit -m` with date
+# Accepted formats: "YYYY.MM.DD", "MM/DD/YYYY", "DD.MM.YYYY", RFC 2822 and ISO 8601
+# See https://alexpeattie.com/blog/working-with-dates-in-git
 tgcm() {
     local date=$1
     shift
