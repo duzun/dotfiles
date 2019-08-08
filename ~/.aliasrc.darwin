@@ -1,6 +1,15 @@
+#!/bin/sh
 
-export EDITOR_PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
-export EDITOR_ARGS="-w"
+export EDITOR_PATH
+export EDITOR_ARGS
+
+for i in code subl3 subl "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"; do
+    if EDITOR_PATH=$(command -v "$i"); then
+        # EDITOR_PATH=$(realpath "$EDITOR_PATH")
+        EDITOR_ARGS="-w"
+        break
+    fi
+done
 
 # Empty the Trash on all mounted volumes and the main HDD.
 # Also, clear Apple’s System Logs to improve shell startup speed.

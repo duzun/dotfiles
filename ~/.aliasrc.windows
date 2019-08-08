@@ -1,3 +1,4 @@
+#!/bin/sh
 
 export EDITOR_PATH="${ProgramFiles}/Sublime Text 3/subl.exe"
 export EDITOR_ARGS="-w"

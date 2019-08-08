@@ -1,6 +1,15 @@
+#!/bin/sh
 
-export EDITOR_PATH="/opt/sublime_text_3/sublime_text"
-export EDITOR_ARGS="-w"
+export EDITOR_PATH
+export EDITOR_ARGS
+
+for i in code subl3 subl "/opt/sublime_text_3/sublime_text"; do
+    if EDITOR_PATH=$(command -v "$i"); then
+        EDITOR_PATH=$(realpath "$EDITOR_PATH")
+        EDITOR_ARGS="-w"
+        break
+    fi
+done
 
 if command -v xset > /dev/null;
 then
