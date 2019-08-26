@@ -2,3 +2,15 @@
 
 export EDITOR_PATH="${ProgramFiles}/Sublime Text 3/subl.exe"
 export EDITOR_ARGS="-w"
+
+if ! alias download 2> /dev/null; then
+    # See https://stackoverflow.com/a/28143180/1242333
+    if command -v cscript > /dev/null; then
+        alias download="cscript /nologo '$_dotfiles/../wget.js'"
+    fi
+fi
+
+# Other methods to download files on Windows (to be tested):
+# bitsadmin /transfer dotfilesDownloadJob /download /priority normal http://downloadsrv/10mb.zip c:\10mb.zip
+# certutil.exe -urlcache -split -f "http://downloadsrv/10mb.zip" 10mb.zip
+# powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('"http://downloadsrv/10mb.zip"','10mb.zip')
