@@ -1360,7 +1360,7 @@ init_dotfiles() {
 
     local i _i _rc _pc
 
-    ln -sfT "$_dotfiles/source" ~/.source
+    ln -sf "$_dotfiles/source" ~/.source
 
     # Try to take care of sourcing .source automatically
     _shell=$(shelltype)
