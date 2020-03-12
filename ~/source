@@ -78,11 +78,12 @@ if [[ $- = *i* ]]; then
 fi
 
 # ------------------------------------------------------------------------------
-if [ $# -ne 0 ] && [ -z "${BASH_SOURCE[*]}" ] && [ "$(basename "$0")" != "Xsession" ]; then
+if [ $# -ne 0 ] && [ -z "${BASH_SOURCE[*]}" -o "${BASH_SOURCE[0]}" == "$0" ] && [ "$(basename "$0")" != "Xsession" ]; then
     _cmd="$1"
     shift
     case "$_cmd" in
         init)
+		echo 'init'
             init_dotfiles "$@"
             exit $?
         ;;
