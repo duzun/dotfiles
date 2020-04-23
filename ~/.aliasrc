@@ -217,6 +217,7 @@ alias nu="npm update"
 alias ni="npm install"
 alias ns="npm run --silent"
 alias np="npm publish"
+alias npp="npm publish --access=public"
 
 # Composer
 alias cu="composer update"
@@ -233,6 +234,7 @@ alias dei="docker exec -it"
 alias ds="docker start"
 alias dr="docker restart"
 alias dt="docker stop"
+alias dta="docker stop \$(docker ps -qa)"
 alias dp="docker system prune -a"
 alias dvrmd="docker volume rm \$(docker volume ls -f dangling=true -q)"
 alias drm="docker rm"
@@ -669,6 +671,9 @@ fi;
 # find . -name .gitattributes | map dirname
 alias map="xargs -n1"
 
+# bin2hex pipe
+alias bin2hex="hexdump -v -e '1/1 \"%02x\"'"
+
 # randhex $byte_length
 randhex() {
     head -c${1:-32} /dev/urandom | hexdump -v -e '1/1 "%02x"'
@@ -676,7 +681,7 @@ randhex() {
 
 # randtext $byte_length
 randtext() {
-    head -c${1:-32} /dev/urandom | base64 | tr -d '='
+    head -c${1:-32} /dev/urandom | base64 | tr -d '=' | tr '+/' '-_'
 }
 
 # Open editor (no wait)
@@ -939,6 +944,26 @@ git2url() {
         ;;
     esac
     echo "$url"
+}
+
+# ------------------------------------------------------------------------------
+
+abs_url() {
+    local url=$1
+    local base=${2%*/}
+    case $url in
+        http://*|https://*|ftp://*|file:///*)
+            echo "$url"
+        ;;
+        //*) echo "${base%*://*}:$url" ;;
+        # /*) echo "${base%*://*}:$url" ;;
+        *) echo "$(dirname "$base")/$url" ;;
+    esac
+}
+
+# ------------------------------------------------------------------------------
+localip() {
+    ip route show | grep -v linkdown | grep -v 'br-' | awk -F'src ' '/src/ { print $2 }' | tail -1 | cut -d' ' -f1
 }
 
 # ------------------------------------------------------------------------------
