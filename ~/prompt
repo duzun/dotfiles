@@ -13,9 +13,8 @@
 # Increase the history file size and set some sane defaults
 export HISTSIZE=20000
 export HISTFILESIZE=10000
-export HISTCONTROL=ignoreboth
-# Don't store commands beginning with a space
-export HISTCONTROL=ignorespace
+# See https://ostechnix.com/how-to-avoid-duplicate-entries-in-bash-history-in-linux/
+export HISTCONTROL=ignoredups:erasedups:ignorespace
 export HISTTIMEFORMAT="%d/%m/%y %T "
 
 bash_prompt() {

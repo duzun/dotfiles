@@ -173,6 +173,8 @@ alias guna="git rm --cached" # unadd
 alias gunaa="git rm -r --cached ." # unadd all
 alias gc="git commit"
 alias gcm="gc -m"
+alias gca="gc --amend --no-edit"
+alias gcam="gc --amend"
 alias gu="git push"
 alias gut="gu --tags"
 alias guf="gu -f"
@@ -184,7 +186,8 @@ alias gsi="gs -i"
 alias gss="gs --skip"
 alias gsc="gs --continue"
 alias gsa="gs --abort"
-alias gh="git checkout"
+# alias gh="git checkout" # conflicts with github-cli
+alias gco="git checkout"
 alias ge="git merge"
 alias gr="git remote"
 alias gb="git branch"
@@ -247,6 +250,17 @@ alias dcs="docker-compose -p \$(pwd | sed 's#[/.]#-#g; s/^-//g')"
 alias dcsb="dcs build"
 alias dcsu="dcs up -d"
 alias dcsd="dcs down"
+
+# Kubernetes
+alias kva="kubectl get all"
+alias kvp="kubectl get pod"
+alias kvs="kubectl get service"
+alias kvd="kubectl get deployment"
+alias kvr="kubectl get replicaset"
+alias kn="kubectl run"
+alias ke="kubectl exec"
+alias kei="kubectl exec -it"
+alias kl="kubectl logs"
 
 # ------------------------------------------------------------------------------
 ## shortcut  for iptables and pass it via sudo#
@@ -354,7 +368,7 @@ alias psgrep='ps aux | head -n1; ps aux | grep -v "\bgrep\b" | grep -i'
 wait_pid() {
     local pid=$1
     local interval="${2:-1}"
-    while kill -0 "$pid" &> /dev/null; do sleep $interval; done
+    while kill -0 "$pid" &> /dev/null; do sleep "$interval"; done
 }
 
 # Wait for a process to end by its name/path
@@ -671,6 +685,11 @@ fi;
 # find . -name .gitattributes | map dirname
 alias map="xargs -n1"
 
+# diff two binary files
+diffbin() {
+    cmp -l "$1" "$2" | gawk '{printf "%08X %02X %02X\n", $1-1, strtonum(0$2), strtonum(0$3)}'
+}
+
 # bin2hex pipe
 alias bin2hex="hexdump -v -e '1/1 \"%02x\"'"
 
@@ -828,29 +847,29 @@ ex() {
       *.tar.bz2)   tar xjf "$1"   ;;
       *.tar.gz)    tar xzf "$1"   ;;
       *.tar.xz)    tar xJf "$1"   ;;
+      *.tar)       tar xf "$1"    ;;
+      *.tbz2)      tar xjf "$1"   ;;
+      *.tgz)       tar xzf "$1"   ;;
       *.bz2)
             if command -v pbzip2 > /dev/null;
-            then pbzip2 -d "$1";
-            else bunzip2 "$1";
+            then pbzip2 -k -d "$1";
+            else bunzip2 -k -d "$1";
             fi
         ;;
       *.gz)
             if command -v pigz > /dev/null;
-            then pigz -d "$1"
-            else gunzip "$1"
+            then pigz -k -d "$1"
+            else gunzip -k -d "$1"
             fi
         ;;
       *.rar)       unrar x "$1"   ;;
-      *.tar)       tar xf "$1"    ;;
-      *.tbz2)      tar xjf "$1"   ;;
-      *.tgz)       tar xzf "$1"   ;;
-      *.zip)       unzip "$1"     ;;
+      *.zip)       unzip -o "$1"  ;;
       *.Z)         uncompress "$1";;
       *.7z)        7z x "$1"      ;;
       *)           echo "'$1' cannot be extracted via ex()" ;;
     esac
   else
-    echo "'$1' is not a valid file"
+    >&2 echo "'$1' is not a valid file"
   fi
 }
 # ------------------------------------------------------------------------------
@@ -1145,7 +1164,7 @@ _init_complete() {
     fi
 
     # alias_completion g;
-    _ga=(gd gb gh gs gg gr ge);
+    _ga=(gd gb gco gs gg gr ge);
 
     # Enable completion for aliases
     if command -v __git_complete > /dev/null;
