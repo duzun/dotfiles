@@ -17,7 +17,7 @@ for i in $i; do
     fi
 done
 
-if command -v xset > /dev/null;
+if [ -n "$DISPLAY" ] && command -v xset > /dev/null;
 then
     # Disable beep
     xset -b

@@ -281,8 +281,8 @@ command -v wget > /dev/null && alias wget='wget -c'
 
 # ------------------------------------------------------------------------------
 # Reload the shell (i.e. invoke as a login shell)
-alias reload_shell="exec \${SHELL} -l"
-alias reload="exec \"\$(realpath /proc/\$\$/exe)\" -l || exec \${SHELL} -l"
+alias reload_shell="exec \${SHELL}"
+alias reload="exec \"\$(realpath /proc/\$\$/exe)\" || exec \${SHELL}"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
