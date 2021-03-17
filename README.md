@@ -1,8 +1,8 @@
-# dotfiles
+# ⊙ dotfiles
 
 My dotfiles (Linux, OSX &amp; Windows) for bash &amp; zsh on PC &amp; server
 
-## Install
+## ⚙ Install
 
 After you've got `git` on your system:
 
@@ -24,10 +24,15 @@ init_git -f
 ~/.dotfiles/~/source init_git -f
 ```
 
-## Update
+## ↻ Update
 
 There is a special alias for updating `dotfiles`:
 
 ```sh
 .update
 ```
+
+## 🔗 Links
+
+- My [manjaro-setup](https://github.com/duzun/manjaro-setup) scripts
+
