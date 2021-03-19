@@ -189,6 +189,7 @@ alias gsa="gs --abort"
 # alias gh="git checkout" # conflicts with github-cli
 alias gco="git checkout"
 alias ge="git merge"
+alias gea="ge --abort"
 alias gr="git remote"
 alias gb="git branch"
 alias gbu="git branch --set-upstream-to "
@@ -1079,12 +1080,34 @@ strename() {
 }
 
 # ------------------------------------------------------------------------------
+# Expand an alias recursively, and echoes the arguments unchanged if not an alias
+#   Eg. alias_expand <alias> [<arguments>]
+#
+#   NOTE: Is it possible to use readline's shell-expand-line or alias-expand-line?
+alias_expand() {
+    local a c
+    c="$1"
+    if a=$(alias "$c" 2> /dev/null); then
+        a=$(echo "$a" | sed 's/^alias .*='\''//;s/'\''$//')
+        shift
+        set -- $a "$@"
+        if [ "$c" == "$1" ]; then
+            echo "$@"
+        else
+            alias_expand "$@"
+        fi
+    else
+        echo "$@"
+        return 1
+    fi
+}
+
 alias_cmd() {
-    alias "$1" | sed 's/^alias .*='\''//;s/\( .\+\|'\''\)//'
+    alias_expand "$1" | cut -d' ' -f1
 }
 
 alias_subcmd() {
-    alias "$1" | sed 's/^alias .*='\''[^\s]*\s//;s/\( .\+\|'\''\)//'
+    alias_expand "$1" | cut -d' ' -f2
 }
 
 alias_completion() {
@@ -1092,8 +1115,6 @@ alias_completion() {
     local cmd completion
 
     # determine first word of alias definition
-    # NOTE: This is really dirty. Is it possible to use
-    #       readline's shell-expand-line or alias-expand-line?
     cmd=${2:-$(alias_cmd "$1")}
 
     # determine completion function
@@ -1124,6 +1145,7 @@ _source_completion_loader() {
 
     if ! command -v _completion_loader > /dev/null;
     then
+        # Is bash-completion installed?
         _f=/usr/share/bash-completion/bash_completion
         [ -f "$_f" ] && . "$_f"
     fi
@@ -1165,14 +1187,30 @@ _init_complete() {
     fi
 
     # alias_completion g;
-    _ga=(gd gb gco gs gg gr ge);
+    _ga=( \
+        gv gva gvs \
+        ga gap gaa \
+        gc gcm gca gcam \
+        gd gda gdao gdan \
+        gb gbu \
+        gu gut guf \
+        gl gls glo \
+        gco \
+        gk \
+        gs gsi gss gsc gsa \
+        gr \
+        gg ggo  \
+        ge gea \
+        gt gf gfg \
+        gw gw^ \
+    );
 
     # Enable completion for aliases
     if command -v __git_complete > /dev/null;
     then
-        for a in "${_ga[@]}"; do __git_complete "$a" "_git_$(alias_subcmd "$a")"; done
+        for a in "${_ga[@]}"; do __git_complete "$a" "_git_$(alias_subcmd "$a" | tr -s '-' '_')"; done
     else
-        for a in "${_ga[@]}"; do complete -o default -o nospace -F "_git_$(alias_subcmd "$a")" "$a"; done
+        for a in "${_ga[@]}"; do complete -o default -o nospace -F "_git_$(alias_subcmd "$a" | tr -s '-' '_')" "$a"; done
     fi
 
     unset _ga
@@ -1184,8 +1222,10 @@ _init_complete() {
             # git
             g \
 
+            dfh du1 du0 \
+
             # npm
-            nu ni ns np \
+            nu ni ns np npp \
 
             # docker
             dv dva dn de dei ds dr dt drm db dbt \
