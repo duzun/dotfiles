@@ -1133,7 +1133,8 @@ _source_completion_loader() {
      ! command -v _complete_alias > /dev/null;
     then
         _c="$_dotfiles/../complete-alias"
-        _f="$_c/bash_completion.sh"
+        # _f="$_c/bash_completion.sh" # old path
+        _f="$_c/complete_alias"
         if [ ! -f "$_f" ] && command -v git > /dev/null; then
             if [ -e "$_c/.git" ]; then (
                 cd "$_c" && \
