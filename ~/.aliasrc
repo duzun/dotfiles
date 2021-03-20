@@ -704,6 +704,12 @@ randtext() {
     head -c${1:-32} /dev/urandom | base64 | tr -d '=' | tr '+/' '-_'
 }
 
+# ------------------------------------------------------------------------------
+# Make sure there is the `code` command, even when only vscodium is installed
+if command -v vscodium > /dev/null && ! command -v code > /dev/null; then
+    alias code="vscodium"
+fi
+
 # Open editor (no wait)
 edit() {
     if [ -f "$EDITOR_PATH" ]; then
