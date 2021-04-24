@@ -64,6 +64,9 @@ fi
 # for Manjaro
 pacman=$(command -v pacman)
 if [ -n "$pacman" ]; then
+    alias unlock="${_sudo}rm /var/lib/pacman/db.lck"    # remove pacman lock
+    alias cleanup="${_sudo}pacman -Rns (pacman -Qtdq)"  # remove orphaned packages
+
     alias pcman="open https://www.archlinux.org/pacman/pacman.8.html"
     alias pS="pacman -S"              # sync: install | update
     alias pQ="pacman -Q"              # query: list files | packaegs
@@ -77,6 +80,7 @@ if [ -n "$pacman" ]; then
 
     # Update & Upgrade
     alias pcu="${_sudo}pacman -Syu"    # update & upgrade
+    alias pcuu="${_sudo}pacman -Syyu"  # update only standard pkgs
     alias pcuq="pcu --noconfirm"       # update & upgrade quiet
     alias pcua="${_sudo}pacman -Syyuu" # update all & upgrade
     alias pcuaq="pcua --noconfirm"     # update all & upgrade quiet
@@ -103,10 +107,12 @@ yaourt=$(command -v paru)
 if [ -n "$yaourt" ]; then
     alias y="$yaourt"                  # search
     alias yq="$yaourt --noconfirm"     # search +silent
-    alias yu="$yaourt -Syu"            # update & upgrade
-    alias yuq="$yaourt -Syu --noconfirm"            # update & upgrade
-    alias yua="$yaourt -Syua"          # update & upgrade + AUR (less safe)
-    alias yuaq="$yaourt -Syua --noconfirm"          # update & upgrade + AUR (less safe)
+    alias yu="$yaourt -Syu"            # update standard pkgs and AUR pkgs
+    alias yuq="yu --noconfirm"  # update & upgrade
+    alias yua="$yaourt -Sua"           # update only AUR pkgs
+    alias yuaq="yua --noconfirm" # update & upgrade + AUR (less safe)
+    alias yyua="$yaourt -Syua"         # update & upgrade + AUR (less safe)
+    alias yyuaq="yyua --noconfirm"  # update & upgrade + AUR (less safe)
     alias yi="$yaourt -S"              # <pkg_name> # install
     alias yiq="$yaourt --noconfirm -S" # <pkg_name> # install +silent
     alias yr="$yaourt -R"              # <pkg_name> # uninstall
