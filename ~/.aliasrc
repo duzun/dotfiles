@@ -100,6 +100,11 @@ alias ll="ls -lhF"
 alias l='ll -a'
 alias l.="ls -dh .*"
 
+alias s='systemctl'
+alias j='journalctl'
+alias sud='sudo -s'
+alias t='tail -n 100 -f'
+
 alias more="less -MNE~"
 
 # Recognize "more" typos
@@ -748,6 +753,81 @@ overdel() {
         head -c "$s" < /dev/urandom > "$i";
         rm -rf -- "$i";
     done;
+}
+
+_rm_dir_ask() {
+    local dir=$1
+    local forced=$2
+    if [ -z "$dir" ]; then
+        >&2 echo "No folder path provided"
+        return 1
+    fi
+
+    if [ ! -d "$dir" ]; then
+        >&2 echo "Folder not found: $dir"
+        return 2
+    fi
+
+    if [ -z "$forced" ]; then
+        echo "Are you sure you want to delete all files in $dir?"
+        read -p " [Y/n]" -n 1 -r;
+        echo "";
+        if [[ ! "${REPLY:-Y}" =~ ^[Yy]$ ]]; then
+            return 10;
+        fi
+    fi
+}
+
+rm_all() {
+    local forced
+    if [ "$1" = "-f" ]; then
+        forced=1
+        shift
+    fi
+
+    [ "$1" == "--" ] && shift
+
+    local dir=$1
+    _rm_dir_ask "$dir" "$forced"
+
+    case $? in
+        1)
+            >&2 echo "  rm_all [-f] <dir_name>"
+            return 1
+        ;;
+        0) ;;
+        *) return $?;;
+    esac;
+
+    # ( cd "$dir" && perl -e 'for(<*>){unlink}' ) # this is not recursive
+    # find "$dir" -type f -exec ionice -c3 rm {} + # this does not remove subfolders
+    mkdir -p /tmp/_rm_all_empty && rsync -a --delete /tmp/_rm_all_empty/ "$dir/" && rm -rf /tmp/_rm_all_empty # this might be faster, uses more CPU, requires an extra step of creating an empty folder
+}
+
+rm_all_slow() {
+    local forced
+    if [ "$1" = "-f" ]; then
+        forced=1
+        shift
+    fi
+
+    [ "$1" == "--" ] && shift
+
+    local dir=$1
+    _rm_dir_ask "$dir" "$forced"
+
+    case $? in
+        1)
+            >&2 echo "  rm_all [-f] <dir_name>"
+            return 1
+        ;;
+        0) ;;
+        *) return $?;;
+    esac;
+
+    # find "${dir:?}" -type f -exec ionice -c3 rm {} + # this is faster, but also may yield high CPU
+    find "${dir:?}" -type f -exec ionice -c3 rm {} \; && \
+    rm -rf -- "${dir:?}"/*
 }
 
 # broot
