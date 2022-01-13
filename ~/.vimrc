@@ -191,10 +191,13 @@ set tabstop=4
 set lbr
 set tw=500
 
-set ai "Auto indent
-set si "Smart indent
+" set ai "Auto indent
+" set si "Smart indent
+set noai "no Auto indent
+
 set wrap "Wrap lines
 
+set paste
 
 """"""""""""""""""""""""""""""
 " => Visual mode related
