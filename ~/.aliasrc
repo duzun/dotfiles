@@ -128,8 +128,8 @@ if [ "$_os" = "osx" ] || [ "$_os" = "bsd" ]; then
     # alias dft='df -Hl | head -1; df -Hl --total | grep total'
 else
     alias df='df -h'
-    alias dfh='df -hlT -x tmpfs -x devtmpfs'
-    alias dft='df -hl | head -1; df -hl -x tmpfs -x devtmpfs --total | grep total'
+    alias dfh='df -hlT -x tmpfs -x devtmpfs -x overlay'
+    alias dft='df -hl | head -1; df -hl -x tmpfs -x devtmpfs -x overlay --total | grep total'
 fi
 
 alias du='du -ch'
