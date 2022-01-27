@@ -591,18 +591,16 @@ alias bc='bc -l'
 # $ .. [nr]
 # @author DUzun.Me
 ..() {
-    local i=$1
-    if [ $# -eq 0 ]
-    then
-        i=1
-    fi
     local LASTDIR=$PWD
-    while [ $i -gt 0 ]
+    local i=$1
+    [ $# -eq 0 ] && i=1
+    while [ $i -gt 0 ] && [ "$PWD" != "/" ]
     do
         cd ..
         i=$((i - 1))
     done
     export OLDPWD=$LASTDIR
+    return $i
 }
 
 alias ...='cd ../..'
