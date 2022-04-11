@@ -66,6 +66,7 @@ pacman=$(command -v pacman)
 if [ -n "$pacman" ]; then
     alias unlock="${_sudo}rm /var/lib/pacman/db.lck"    # remove pacman lock
     alias cleanup="${_sudo}pacman -Rns (pacman -Qtdq)"  # remove orphaned packages
+    alias update="${_sudo}pacman -Syu --noconfirm"
 
     alias pcman="open https://www.archlinux.org/pacman/pacman.8.html"
     alias pS="pacman -S"              # sync: install | update
@@ -118,6 +119,12 @@ if [ -n "$yaourt" ]; then
     alias yr="$yaourt -R"              # <pkg_name> # uninstall
     alias yrf="$yaourt -Rsn"           # <pkg_name> # uninstall completely: configs and dependencies
     alias yl="$yaourt -Qm"             # list installed packages
+
+    if [ -n "$pacman" ]; then
+        alias updatea="update && yuaq"
+    else
+        alias updatea="yuaq"
+    fi
 fi
 
 logout() {
