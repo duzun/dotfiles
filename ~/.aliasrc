@@ -564,6 +564,8 @@ if [ "$UID" != "0" ]; then
     alias poweroff='sudo /sbin/poweroff'
     alias halt='sudo /sbin/halt'
     alias shutdown='sudo /sbin/shutdown'
+
+    command -v compsize > /dev/null && alias compsize="sudo compsize"
 fi
 
 # ------------------------------------------------------------------------------
