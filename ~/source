@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ###################################
 # DUzun's dotfiles main source    #
 # @version 2.3.0                  #
