@@ -251,6 +251,9 @@ alias drme="docker rm \$(docker ps -qa --no-trunc --filter 'status=exited')"
 alias db="docker build"
 alias dbt="docker build -t"
 
+# Run a clean bash container with current folder mounted as /srv
+alias dbash='docker run --rm -it -v "$(pwd):/srv" -w /srv bash'
+
 # docker-compose
 alias dcs="docker-compose -p \$(pwd | sed 's#[/.]#-#g; s/^-//g')"
 alias dcsb="dcs build"
