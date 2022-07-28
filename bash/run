@@ -3,8 +3,8 @@
 _me=$(realpath "$0")
 _dir=$(dirname "$_me")
 
-if [ "$(docker images -q bash > /dev/null)" = "" ]; then
-    docker build -t bash "$_dir"
+if [ "$(docker images -q dotbash > /dev/null)" = "" ]; then
+    docker build -t dotbash "$_dir"
 fi
 
-docker run -it --rm -v "$_dir/../:/opt/dotfiles" -w /opt/dotfiles --name bash bash "$@"
+docker run -it --rm -v "$_dir/../:/opt/dotfiles" -w /opt/dotfiles --name dotbash dotbash "$@"
