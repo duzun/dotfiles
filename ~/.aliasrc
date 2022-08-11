@@ -410,6 +410,63 @@ wait_proc() {
     wait_pid "$pid" "$@"
 }
 
+# Watch a folder and rsync files to a destination on change
+watchnsync() {
+    # Requires inotify-tools
+    if ! command -v inotifywait >/dev/null; then
+        echo >&2 "inotifywait not found"
+        echo >&2 "Please install inotify-tools first!"
+        return 1
+    fi
+
+    local rdir=$1
+    shift
+
+    if [ -z "$rdir" ]; then
+        echo >&2 "Usage: ( cd <baseDir> && watchnsync <remoteDir>/ { <watchDir>/ }"
+        return 2
+    fi
+
+    local exclude="node_modules|vendor"
+
+    if [ "$#" -lt "1" ]; then
+        exclude=".git|$exclude"
+        set -- ./
+    fi
+    [ "${rdir: -1}" = '/' ] || rdir="$rdir/"
+
+    local events=(
+        -e modify
+        -e create
+        # -e move
+        # -e attrib
+    )
+    local args=("$@")
+    while i=$(inotifywait -qr "${events[@]}" --exclude "$exclude" "${args[@]}"); do
+        set -- $i
+
+        local dir=$1
+        local evt=$2
+        local file=$3
+
+        local fn="$dir$file"
+        [ "${dir:0:2}" = './' ] && dir="${dir:2}"
+        local dst="$rdir$dir"
+
+        echo
+        echo "$evt $fn"
+
+        case $evt in
+            MODIFY|CREATE)
+                rsync -rlptzzsDhP "$fn" "$dst"
+            ;;
+            *)
+                echo >&2 "evt $evt ($i) not implemented yet"
+            ;;
+        esac
+    done
+}
+
 ## Get cpu info ##
 if command -v lscpu > /dev/null;
 then
