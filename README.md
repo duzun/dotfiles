@@ -53,3 +53,4 @@ There is a special alias for updating `dotfiles`:
 
 - [BuyMeACoffee.com/duzun](https://www.buymeacoffee.com/duzun)
 - [PayPal.me/duzuns](https://www.paypal.me/duzuns)
+- [Revolut.me/duzun](https://revolut.me/duzun)
