@@ -393,6 +393,7 @@ alias netports="netstat -tulapn"
 
 # grep process:
 alias psgrep='ps aux | head -n1; ps aux | grep -v "\bgrep\b" | grep -i'
+alias pu='ps -fu $USER'
 
 # Wait for a process to end by its PID
 wait_pid() {
