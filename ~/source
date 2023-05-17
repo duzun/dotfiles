@@ -37,6 +37,17 @@ _profile=$(realpath "$_profile")
 _dotfiles=$(dirname "$_profile")
 
 # ------------------------------------------------------------------------------
+_init_commands() {
+    [ -d "$1" ] || return 1
+    local _file _cmd _path
+    for _file in "$1"/*.sh; do
+        _cmd="${_file##*/}"
+        _path=$(command -v "${_cmd%.*}" 2> /dev/null) && . "$_file" "$_path"
+    done
+}
+
+_init_commands "$_dotfiles/command"
+# ------------------------------------------------------------------------------
 [ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
 
 # ------------------------------------------------------------------------------

@@ -105,13 +105,6 @@ alias j='journalctl'
 alias sud='sudo -s'
 alias t='tail -n 100 -f'
 
-alias more="less -MNE~"
-
-# Recognize "more" typos
-alias mroe=more
-alias moer=more
-alias mreo=more
-
 ## Colorize the grep command output for ease of use (good for log files)##
 if echo | grep --color 2> /dev/null; then
     alias grep  > /dev/null 2>&1 || alias grep='grep --color=auto'
@@ -160,103 +153,6 @@ alias mv='mv -i'
 alias cp='cp -i'
 ln --help 2> /dev/null | grep -q -- '--interactive' && alias ln='ln -i'
 
-# Git
-alias g="git"
-alias gva="git status"
-alias gv="gva ."
-alias gvs="gv -s"
-alias gda="git diff"
-alias gdan="gda --name-status"
-alias gd="gda ."
-alias gdn="gdan ."
-alias gdao="gda --cached"
-alias gdo="gdao ."
-alias ga="git add"
-alias gap="ga -p"
-alias gaa="ga --all"
-alias guna="git rm --cached" # unadd
-alias gunaa="git rm -r --cached ." # unadd all
-alias gc="git commit"
-alias gcm="gc -m"
-alias gca="gc --amend --no-edit"
-alias gcam="gc --amend"
-alias gu="git push"
-alias gut="gu --tags"
-alias guf="gu -f"
-alias gl="git pull"
-alias gls="gl --rebase"
-alias glo="gl origin"
-alias gs="git rebase"
-alias gsi="gs -i"
-alias gss="gs --skip"
-alias gsc="gs --continue"
-alias gsa="gs --abort"
-# alias gh="git checkout" # conflicts with github-cli
-alias gco="git checkout"
-alias ge="git merge"
-alias gea="ge --abort"
-alias gr="git remote"
-alias gb="git branch"
-alias gbu="git branch --set-upstream-to "
-alias gt="git tag"
-alias gf="git fetch"
-alias gg="git log"
-alias ggs="git log --stat"
-alias ggso="git log --stat --oneline"
-alias ggo="git log --oneline"
-alias ggg="git log --oneline --all --graph --decorate"
-alias gk="git cherry-pick"
-alias gw="git show"
-alias gw^="gw HEAD^"
-alias gw^^="gw HEAD~2"
-alias gw^^^="gw HEAD~3"
-alias gw^^^^="gw HEAD~4"
-alias gfg="git config --global"
-alias gc_counts="git shortlog -s | sort -k1 -nr"
-alias gc_total="git rev-list --all --count"
-
-# `git commit -m` with date
-# Accepted formats: "YYYY.MM.DD", "MM/DD/YYYY", "DD.MM.YYYY", RFC 2822 and ISO 8601
-# See https://alexpeattie.com/blog/working-with-dates-in-git
-tgcm() {
-    local date=$1
-    shift
-    GIT_AUTHOR_DATE="$date" GIT_COMMITTER_DATE="$date" gcm "$@" --date "$date"
-}
-
-# NPM
-alias nu="npm update"
-alias ni="npm install"
-alias ns="npm run --silent"
-alias np="npm publish"
-alias npp="npm publish --access=public"
-
-# Composer
-alias cu="composer update"
-alias ci="composer install"
-alias cr="composer require"
-alias cs="composer run-script"
-
-# Docker
-alias dv="docker ps"
-alias dva="docker ps -a"
-alias dn="docker run"
-alias de="docker exec"
-alias dei="docker exec -it"
-alias ds="docker start"
-alias dr="docker restart"
-alias dt="docker stop"
-alias dta="docker stop \$(docker ps -qa)"
-alias dp="docker system prune -a"
-alias dvrmd="docker volume rm \$(docker volume ls -f dangling=true -q)"
-alias drm="docker rm"
-alias drme="docker rm \$(docker ps -qa --no-trunc --filter 'status=exited')"
-alias db="docker build"
-alias dbt="docker build -t"
-
-# Run a clean bash container with current folder mounted as /srv
-alias dbash='docker run --rm -it -v "$(pwd):/srv" -w /srv bash'
-
 # docker-compose
 alias dcs="docker-compose -p \$(pwd | sed 's#[/.]#-#g; s/^-//g')"
 alias dcsb="dcs build"
@@ -275,17 +171,6 @@ alias kei="kubectl exec -it"
 alias kl="kubectl logs"
 
 # ------------------------------------------------------------------------------
-## shortcut  for iptables and pass it via sudo#
-alias ipt='sudo /sbin/iptables'
-
-# display all rules #
-alias iptlist='sudo /sbin/iptables -L -n -v --line-numbers'
-alias iptlistin='sudo /sbin/iptables -L INPUT -n -v --line-numbers'
-alias iptlistout='sudo /sbin/iptables -L OUTPUT -n -v --line-numbers'
-alias iptlistfw='sudo /sbin/iptables -L FORWARD -n -v --line-numbers'
-alias firewall=iptlist
-
-# ------------------------------------------------------------------------------
 command -v colordiff > /dev/null && alias diff='colordiff'
 
 # Resume wget by default
@@ -302,18 +187,6 @@ alias path='echo -e ${PATH//:/\\n}'
 # ------------------------------------------------------------------------------
 # get error messages from journalctl
 alias jctl="journalctl -p 3 -xb"
-
-# ------------------------------------------------------------------------------
-# youtube-dl
-alias yta-aac="youtube-dl --extract-audio --audio-format aac "
-alias yta-best="youtube-dl --extract-audio --audio-format best "
-alias yta-flac="youtube-dl --extract-audio --audio-format flac "
-alias yta-m4a="youtube-dl --extract-audio --audio-format m4a "
-alias yta-mp3="youtube-dl --extract-audio --audio-format mp3 "
-alias yta-opus="youtube-dl --extract-audio --audio-format opus "
-alias yta-vorbis="youtube-dl --extract-audio --audio-format vorbis "
-alias yta-wav="youtube-dl --extract-audio --audio-format wav "
-alias ytv-best="youtube-dl -f bestvideo+bestaudio "
 
 
 # ------------------------------------------------------------------------------
@@ -383,17 +256,12 @@ exists() {
     done
 }
 
-alias nowtime='date +"%T"'
-alias nowdate='date +"%d-%m-%Y"'
 
 # Stop after sending count ECHO_REQUEST packets #
 alias ping='ping -c 5'
 
 alias netports="netstat -tulapn"
 
-# grep process:
-alias psgrep='ps aux | head -n1; ps aux | grep -v "\bgrep\b" | grep -i'
-alias pu='ps -fu $USER'
 
 # Wait for a process to end by its PID
 wait_pid() {
@@ -479,131 +347,6 @@ fi
 alias cpucount='getconf _NPROCESSORS_ONLN'
 
 
-# psmem [-g grep] [-u user] ... [-c] command
-# @author DUzun.Me
-psmem() {
-    local help
-    local cmd
-    local user
-    local grep
-    local POSITIONAL=()
-
-    # Parse parameters
-    while [ $# -gt 0 ]; do
-        local key="$1"
-
-        case $key in
-            -g|--grep)
-                grep="$2"
-                shift # past argument
-                shift # past value
-            ;;
-            -u|--user)
-                user="$2"
-                shift # past argument
-                shift # past value
-            ;;
-            -c|-C|--cmd)
-                cmd="$2"
-                shift # past argument
-                shift # past value
-            ;;
-            --help)
-                help=1
-            ;;
-            *)    # unknown option
-                POSITIONAL+=("$1") # save it in an array for later
-                shift # past argument
-            ;;
-        esac
-    done
-
-    set -- "${POSITIONAL[@]}" # restore positional parameters
-
-    if [ -z "$cmd" ] && [ $# -gt 0 ]; then
-        cmd="$1"
-        shift
-    fi
-
-    local h=rss
-    local a="$*"
-    local e=
-
-    # Show usage/help
-    if [ -z "$cmd" ] && [ -z "$grep" ] && [ -z "$user" ] && [ -z "$a" ] || [ -n "$help" ]; then
-        echo "Usage:"
-        echo "   psmem [-g grep] [-u user] ... [-c] command"
-        echo "   psmem --help"
-        echo ""
-        echo "   All extra parameters go to \`ps\`"
-        return 1
-    fi
-
-    if [ -n "$user" ]; then
-        a="$a -A"
-        h="user,$h"
-        e="$e | awk '\$1 == \"$user\"' | cut -d' ' -f1 -s --complement"
-        if [ -n "$cmd" ]; then
-            h="$h,comm"
-            e="$e | awk '\$2 == \"$cmd\"'"
-        else
-            [ -n "$grep" ] && h="$h,comm"
-        fi
-    else
-        if [ -n "$cmd" ]; then
-            a="$a -C '$cmd'"
-        else
-            a="$a -A"
-        fi
-        [ -n "$grep" ] && h="$h,comm"
-    fi
-
-    local e="ps --no-headers -o '$h' $a$e"
-    [ -n "$grep" ] && e="$e | grep -v grep | grep -i '$grep'"
-    if [ "$h" != "rss" ]; then
-        cmd=$(eval "$e" | awk '{print $2}' | sort | uniq -c | sort -k1 -nr | awk '{print "("$2" x"$1")"}')
-        e="$e | awk '{print \$1}'"
-    else
-        cmd=;
-    fi
-
-    echo -n "${cmd[@]}" "RAM: "
-    a=$(eval "$e")
-    h=$(echo "${a[@]}" | wc -w)
-    if [ "$h" -gt 0 ]; then
-        echo -n "$( ( IFS=$'\n'; echo "${a[@]}" ) | awk '{ sum+=$1 } END { printf ("%s%d%s", "~", sum/NR/1024,"M") }') x$h = "
-        ( IFS=$'\n'; echo "${a[@]}" ) | awk '{ sum+=$1 } END { printf ("%d%s", sum/1024,"M") }'
-    else
-        echo none
-    fi
-}
-
-# @author DUzun.Me
-psmemo() {
-    local p=$1
-    local g=$2
-    local h=rss # comm
-    local c
-    [ -n "$g" ] && h=$h,user
-
-    list() {
-        if [ -z "$g" ]; then
-            ps --no-headers -o "$h" -C $p
-        else
-            ps --no-headers -o "$h" -C $p | grep $g
-        fi
-    }
-
-    c=$(list | wc -l)
-    echo -n "\"$1"\" "RAM: "
-    if [ "$c" -gt 0 ]; then
-        echo -n "$(list | awk '{ sum+=$1 } END { printf ("%s%d%s", "~", sum/NR/1024,"M") }') x$c = "
-        list | awk '{ sum+=$1 } END { printf ("%d%s", sum/1024,"M") }'
-    else
-        echo none
-    fi
-}
-
 # Import an /etc/passw line
 # Eg. `impw 'duzun:x:1000:1000:Dumitru Uzun,,,,duzun.me:/home/duzun:/bin/bash'`
 impw() {
@@ -650,40 +393,6 @@ alias sha1="openssl sha1 | cut -d' ' -f2"
 
 # Start calculator with math support
 alias bc='bc -l'
-
-# ------------------------------------------------------------------------------
-#alias ..="cd .."
-
-# $ .. [nr]
-# @author DUzun.Me
-..() {
-    local LASTDIR=$PWD
-    local i=$1
-    [ $# -eq 0 ] && i=1
-    while [ $i -gt 0 ] && [ "$PWD" != "/" ]
-    do
-        cd ..
-        i=$((i - 1))
-    done
-    export OLDPWD=$LASTDIR
-    return $i
-}
-
-alias ...='cd ../..'
-alias ....='cd ../../..'
-
-# cd up to "partial_str"
-# $ up "partial_str"
-up() {
-    local up;
-    up=$(expr "$PWD" : "^\(.*$1[^/]*\)")
-    [ "x$up" = "x" ] || cd "$up" || return 1
-}
-
-# Create directory and cd to it
-mcd() {
-    mkdir -p "$@" && cd "$_" || return $?
-}
 
 # Short for <find file>
 f() {
