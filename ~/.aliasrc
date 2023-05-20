@@ -266,8 +266,26 @@ impw() {
 alias root="sudo -i"
 command -v su > /dev/null || alias su="sudo -i"
 
+# Execute a command with "sudo" if not under root
+# `sudoif -v` only echo the command to be executed
+sudoif() {
+    local _view
+    if [ "$1" == "-v" ]; then
+        _view=1
+        shift
+    fi
+
+    local uid="${UID:-$(id -u)}"
+    [ "$uid" -ne "0" ] && set -- $(alias_expand "sudo") "$@"
+    if [ -n "$_view" ]; then
+        echo "$@"
+    else
+        "$@"
+    fi
+}
+
 # reboot / halt / poweroff
-if [ "$UID" != "0" ]; then
+if [ "${UID:-$(id -u)}" != "0" ]; then
     alias reboot > /dev/null 2>&1 || alias reboot='sudo /sbin/reboot'
     alias poweroff='sudo /sbin/poweroff'
     alias halt='sudo /sbin/halt'

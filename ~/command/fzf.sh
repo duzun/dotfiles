@@ -3,6 +3,16 @@
 
 alias fvim="fzf --bind 'enter:become(vim {})'"
 
+# fzf bind cmd
+fzfb() {
+    if [ -z "$1" ]; then
+        >&2 echo "fzfb <cmd> -> <cmd> \$(fzf)"
+        return 1
+    fi
+    local cmd=${1:?}
+    fzf --bind "enter:become('$cmd' {})"
+}
+
 s="${_shell:-bash}"
 
 for i in \
