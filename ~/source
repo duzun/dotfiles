@@ -36,6 +36,14 @@ fi
 _profile=$(realpath "$_profile")
 _dotfiles=$(dirname "$_profile")
 
+_git_aliases_complete=()
+_aliases_complete=()
+
+declare -l _os
+declare -l _shell
+
+# ------------------------------------------------------------------------------
+. "$_dotfiles/.aliasrc.dotfiles";
 # ------------------------------------------------------------------------------
 _init_commands() {
     [ -d "$1" ] || return 1
@@ -51,8 +59,22 @@ _init_commands "$_dotfiles/command"
 [ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
 
 # ------------------------------------------------------------------------------
+[ -n "$_shell" ] && [ -f "$_dotfiles/.aliasrc.$_shell" ] && . "$_dotfiles/.aliasrc.$_shell";
+[ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
+[ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;
+
+# ------------------------------------------------------------------------------
+alias .cd="cd '$_dotfiles/..'"
+alias .source=". '$_dotfiles/source'"
+alias .update="( cd '$(dirname "$_dotfiles")' && git pull --rebase --recurse-submodules) && .source"
+alias .open_git="open \"\$(dotfiles_url)\""
+
+# ------------------------------------------------------------------------------
 # Set the prompt and shell behaviour
 . "$_dotfiles/prompt";
+
+# echo "_aliases_complete (${#_aliases_complete[@]}):" "${_aliases_complete[@]}"
+# echo "_git_aliases_complete (${#_git_aliases_complete[@]}):" "${_git_aliases_complete[@]}"
 
 # ------------------------------------------------------------------------------
 # Custom .profile

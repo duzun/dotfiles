@@ -7,35 +7,9 @@
 _alias=$(realpath "${BASH_SOURCE:-$0}")
 _dotfiles=$(dirname "$_alias")
 
-# ------------------------------------------------------------------------------
-# Detect OS type
-
-ostype() {
-    local _os;
-
-    case "$OSTYPE" in
-        solaris*) _os=sun ;;
-        darwin*)  _os=osx ;;
-        linux*)   _os=linux ;;
-        bsd*)     _os=bsd ;;
-        msys*)    _os=windows ;;
-        *)        _os=$(uname)
-            case "$_os" in
-                Linux*)           _os=linux ;;
-                Darwin*)          _os=osx ;;
-                FreeBSD|OpenBSD)  _os=bsd ;;
-                SunOS)            _os=sun ;;
-                MINGW32_NT*)      _os=windows ;;
-                *)       _os="${_os,,}" ;;
-                # *)       _os=$(echo "$_os" | awk '{print tolower($0)}') ;;
-            esac
-        ;;
-    esac
-
-    echo "$_os";
-}
-
 _os=$(ostype)
+_shell=$(shelltype)
+# ------------------------------------------------------------------------------
 
 # bash only, but cool :-)
 if_os () { [[ $OSTYPE == *$1* ]]; }
@@ -47,33 +21,6 @@ if_nix () {
     esac
     [[ "${sys}" == "$1" ]];
 }
-
-# ------------------------------------------------------------------------------
-# Guess the shell type - doesn't quite work in subshells (when not your login shell)
-shelltype() {
-    if [ -n "$ZSH_NAME" ] || [ -n "$ZSH_VERSION" ]; then
-        echo 'zsh'
-    elif [ -n "${BASH_SOURCE:-}" ] || [ -n "$BASH" ]; then
-        echo 'bash'
-    else
-        local s;
-        s=$(realpath /proc/$$/exe); # it's safer to check real processes' path
-        if [ -n "$s" ] && [ "$s" != "/proc/$$/exe" ] && [ -e "$s" ]; then
-            # echo "${s##*/}"
-            basename "$s"
-        elif [ -n "$shell" ]; then
-            # echo "${shell##*/}"
-            basename "$shell"
-        elif [ -n "$SHELL" ]; then
-            basename "$(realpath "$SHELL")"
-        else
-            echo 'sh'; # unknown
-            return 1;
-        fi
-    fi
-}
-
-_shell=$(shelltype)
 
 # ------------------------------------------------------------------------------
 # "Edit this file" command
@@ -131,6 +78,9 @@ alias du0='du -d 0'
 # alias dut='du -hsx * | sort -rh | head' # See fs() function below
 alias dut='fs -h -x'
 
+_aliases_complete+=(
+    dfh du1 du0
+)
 
 # Add safety nets:
 
@@ -159,16 +109,9 @@ alias dcsb="dcs build"
 alias dcsu="dcs up -d"
 alias dcsd="dcs down"
 
-# Kubernetes
-alias kva="kubectl get all"
-alias kvp="kubectl get pod"
-alias kvs="kubectl get service"
-alias kvd="kubectl get deployment"
-alias kvr="kubectl get replicaset"
-alias kn="kubectl run"
-alias ke="kubectl exec"
-alias kei="kubectl exec -it"
-alias kl="kubectl logs"
+_aliases_complete+=(
+    dcs dcsb dcsu dcsd
+)
 
 # ------------------------------------------------------------------------------
 command -v colordiff > /dev/null && alias diff='colordiff'
@@ -214,48 +157,6 @@ del_path() {
         PATH=$(sed 's/:/\n/g' <<<"$PATH" | grep -v "^$p/*\$" | sed '{ :q;N;s/\n/:/g;t q }')
     fi
 }
-
-# Test whether a glob has any matches
-# https://stackoverflow.com/questions/2937407/test-whether-a-glob-has-any-matches-in-bash
-exists() {
-    # Bash
-    if command -v compgen > /dev/null
-    then
-        compgen -G "$1" > /dev/null
-        return $?
-    fi
-
-    # Exceptions
-    case "$(shelltype)" in
-        zsh)
-            local f=$1
-            if [ -e "$f" ] || [ -L "$f" ]; then return 0; fi
-
-            # If $1 is a pattern, we have to expand it in zsh:
-            local g
-            g=$(setopt | grep nullglob)
-            setopt nullglob
-            set -- ${~f} 2> /dev/null
-            [ -z "$g" ] && setopt +o nullglob
-            [ "$f" = "$1" ] && return 1
-            [ -e "$1" ] || [ -L "$1" ]
-            return $?
-        ;;
-        # *) ;;
-    esac
-
-    # Non-Bash
-    for f in $1; do
-        ## Check if the glob gets expanded to existing files.
-        ## If not, f here will be exactly the pattern above
-        ## and the exists test will evaluate to false.
-        [ -e "$f" ] || [ -L "$f" ]
-
-        ## This is all we needed to know, so we can break after the first iteration
-        return $?
-    done
-}
-
 
 # Stop after sending count ECHO_REQUEST packets #
 alias ping='ping -c 5'
@@ -460,6 +361,10 @@ done
 # cURL with Cookies
 alias ccurl="curl -b /tmp/cookie_curl.txt -c /tmp/cookie_curl.txt"
 alias ccurl_edit="command \${EDITOR_PATH:-\$EDITOR} /tmp/cookie_curl.txt"
+_aliases_complete+=(
+    ccurl
+);
+# alias_completion ccurl
 
 # Download first argument to stdout
 if command -v curl > /dev/null; then
@@ -602,10 +507,6 @@ rm_all_slow() {
     find "${dir:?}" -type f -exec ionice -c3 rm {} \; && \
     rm -rf -- "${dir:?}"/*
 }
-
-# broot
-alias br='broot -dhp'
-alias bs='broot --sizes'
 
 # Determine size of a file or total size of a directory
 fs() {
@@ -831,26 +732,8 @@ open-url() {
 
     eval "$_o '$_u'"
 }
-# ------------------------------------------------------------------------------
-# Convert a git remote to corresponding HTTP(S) URL
-# Example: git@github.com:duzun/dotfiles.git -> https://git@github.com/duzun/dotfiles
-git2url() {
-    local url="${1:-$(cat)}"
-
-    case $url in
-        *://*) ;;
-        *@*:*)
-            url="${url%.git}"
-            url="${url#*@}"
-            url="$(sed 's/:/\//' <<<"$url")"
-            url="${2:-https}://${url}"
-        ;;
-    esac
-    echo "$url"
-}
 
 # ------------------------------------------------------------------------------
-
 abs_url() {
     local url=$1
     local base=${2%*/}
@@ -963,171 +846,6 @@ strename() {
 }
 
 # ------------------------------------------------------------------------------
-# Expand an alias recursively, and echoes the arguments unchanged if not an alias
-#   Eg. alias_expand <alias> [<arguments>]
-#
-#   NOTE: Is it possible to use readline's shell-expand-line or alias-expand-line?
-alias_expand() {
-    local a c
-    c="$1"
-    if a=$(alias "$c" 2> /dev/null); then
-        a=$(echo "$a" | sed 's/^alias .*='\''//;s/'\''$//')
-        shift
-        set -- $a "$@"
-        if [ "$c" == "$1" ]; then
-            echo "$@"
-        else
-            alias_expand "$@"
-        fi
-    else
-        echo "$@"
-        return 1
-    fi
-}
-
-alias_cmd() {
-    alias_expand "$1" | cut -d' ' -f1
-}
-
-alias_subcmd() {
-    alias_expand "$1" | cut -d' ' -f2
-}
-
-alias_completion() {
-    # keep global namespace clean
-    local cmd completion
-
-    # determine first word of alias definition
-    cmd=${2:-$(alias_cmd "$1")}
-
-    # determine completion function
-    completion=$(complete -p "$1" 2>/dev/null)
-
-    # run _completion_loader only if necessary
-    [[ -n $completion ]] || {
-
-        # load completion
-        command -v _completion_loader > /dev/null && \
-        _completion_loader "$cmd"
-
-        # detect completion
-        completion=$(complete -p "$cmd" 2>/dev/null)
-    }
-
-    # ensure completion was detected
-    [[ -n $completion ]] || return 1
-
-    # configure completion
-    eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
-}
-
-_source_completion_loader() {
-    command -v complete > /dev/null || return 1;
-
-    local _f _c
-
-    if ! command -v _completion_loader > /dev/null;
-    then
-        # Is bash-completion installed?
-        _f=/usr/share/bash-completion/bash_completion
-        [ -f "$_f" ] && . "$_f"
-    fi
-
-    # complete-alias requires bash-completion
-    if command -v _completion_loader > /dev/null && \
-     ! command -v _complete_alias > /dev/null;
-    then
-        _c="$_dotfiles/../complete-alias"
-        # _f="$_c/bash_completion.sh" # old path
-        _f="$_c/complete_alias"
-        if [ ! -f "$_f" ] && command -v git > /dev/null; then
-            if [ -e "$_c/.git" ]; then (
-                cd "$_c" && \
-                git checkout -f . && \
-                git pull --rebase
-            )
-            else (
-                cd "$_dotfiles/.." && \
-                git submodule init && \
-                git submodule update
-            )
-            fi
-        fi
-
-        [ -f "$_f" ] && . "$_f"
-    fi
-}
-
-_init_complete() {
-    command -v complete > /dev/null || return 1;
-
-    _source_completion_loader;
-
-    if command -v _completion_loader > /dev/null;
-    then
-        _completion_loader git
-        _completion_loader curl
-    fi
-
-    # alias_completion g;
-    _ga=( \
-        gv gva gvs \
-        ga gap gaa \
-        gc gcm gca gcam \
-        gd gda gdao gdan \
-        gb gbu \
-        gu gut guf \
-        gl gls glo \
-        gco \
-        gk \
-        gs gsi gss gsc gsa \
-        gr \
-        gg ggo  \
-        ge gea \
-        gt gf gfg \
-        gw gw^ \
-    );
-
-    # Enable completion for aliases
-    if command -v __git_complete > /dev/null;
-    then
-        for a in "${_ga[@]}"; do __git_complete "$a" "_git_$(alias_subcmd "$a" | tr -s '-' '_')"; done
-    else
-        for a in "${_ga[@]}"; do complete -o default -o nospace -F "_git_$(alias_subcmd "$a" | tr -s '-' '_')" "$a"; done
-    fi
-
-    unset _ga
-
-    # if complete-alias is loaded, use it for some aliases
-    if command -v _complete_alias > /dev/null;
-    then
-        _a=( \
-            # git
-            g \
-
-            dfh du1 du0 \
-
-            # npm
-            nu ni ns np npp \
-
-            # docker
-            dv dva dn de dei ds dr dt drm db dbt \
-
-            # docker-compose
-            dcs dcsb dcsu dcsd \
-
-            ccurl \
-        );
-
-        for a in "${_a[@]}"; do complete -F _complete_alias "$a"; done
-        unset _a
-    fi
-
-    alias_completion mcd mkdir
-    # alias_completion ccurl
-}
-
-# ------------------------------------------------------------------------------
 # Add to path npm's bin folder
 npmbin() {
     local npmbin;
@@ -1149,259 +867,6 @@ composerbin() {
     composerbin=${PWD:-$(pwd)}/vendor/bin;
     add_path "$composerbin" && echo "$composerbin";
     return $?;
-}
-
-# ------------------------------------------------------------------------------
-_is_sourced() {
-    _is_sourced="$1"
-    local _rc="$2"
-
-    grep -q "^[^#]*. $_is_sourced"          "$_rc" || \
-    grep -q "^[^#]*source $_is_sourced"     "$_rc" || \
-    grep -q "^[^#]*. '$_is_sourced'"        "$_rc" || \
-    grep -q "^[^#]*source '$_is_sourced'"   "$_rc" || \
-    grep -q "^[^#]*. \"$_is_sourced\""      "$_rc" || \
-    grep -q "^[^#]*source \"$_is_sourced\"" "$_rc" && \
-    return
-
-    _is_sourced=
-    return 1
-}
-
-is_sourced() {
-    local fn="$1"
-    local _rc="$2"
-
-    if [ -z "$_rc" ]; then
-        _shell=$(shelltype)
-        _rc=~/".${_shell}rc";
-    fi
-
-    [ -e "$_rc" ] || return 2
-
-    local _dn _fn
-    _dn="$(dirname "$fn")"
-    if  [ "$_dn" = "~" ] || \
-        [ "$_dn" = "\$HOME" ] || \
-        [ "$_dn" = "$HOME" ]
-    then
-        _fn="$(basename "$fn")"
-        _is_sourced      "~/$_fn" "$_rc" || \
-        _is_sourced "\$HOME/$_fn" "$_rc" || \
-        _is_sourced  "$HOME/$_fn" "$_rc" || \
-        return 1
-    else
-        _is_sourced "$fn" "$_rc" || return 1
-    fi
-}
-
-is_dotfiles_sourced() {
-    local _rc="$1"
-    local fn=~/.source
-
-    if [ -z "$_rc" ]; then
-        _shell=$(shelltype)
-        _rc=~/".${_shell}rc";
-    fi
-
-    [ "$(readlink "$fn")" = "$_dotfiles/source" ] && is_sourced '~/.source' "$_rc"  || \
-    is_sourced "$_dotfiles/source" "$_rc" || \
-    is_sourced "\$_dotfiles/source" "$_rc" || \
-    return 1
-}
-
-# ------------------------------------------------------------------------------
-# Init git config.
-# Usage: init_git [-f]
-init_git() {
-    if ! command -v git > /dev/null ; then
-        echo "Looks like git is not installed"
-        return 1
-    fi
-
-    # [ -n "$BASH" ] && ! command -v __git_ps1 > /dev/null && [ ! -e ~/.git-prompt.sh ] && \
-    # curl -L -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
-
-    local _name _value _default _section _username _pv _dvb
-    local gfg="git config --global"
-
-    _force=$(echo "$@" | grep -- '-f')
-    grep -v '^;' "$_dotfiles/.gitconfig" | while read -r ln; do
-        ln="${ln##*( )}"
-        if [[ "${ln:0:1}" == "[" ]]; then
-            ln=$(echo "${ln:1:${#ln}-2}" | tr -s '\ "' '.')
-            _section=${ln%%.}
-            # echo [$_section]
-        else
-            _name=${ln%%=*}
-            _value=${ln:${#_name}+1}
-            _value=${_value/# /}
-            _name=${_name/% /}
-            # echo $_section.$_name=$_value
-            $gfg "$_section.$_name" "$_value"
-        fi
-    done
-
-    echo ""
-    echo "$gfg:"
-    _section=user
-    _username=$(whoami)
-    _value=
-    for _name in name email username; do
-        _pv=$_value
-        _value=$($gfg "$_section.$_name");
-        _default=$_value;
-
-        # Try to get a default value for missing git config
-        if [ -z "$_default" ] ; then
-            if [[ "$_name" == "name" ]]; then
-                _default=$(getent passwd "$_username" | cut -d: -f5 | cut -d, -f1)
-            elif [[ "$_name" == "email" ]]; then
-                _default="$_username@$(hostname)"
-            elif [[ "$_name" == "username" ]]; then
-                _default=$_username
-                if [[ "$_default" == "root" ]] || [[ "$_default" == "user" ]]; then
-                    if [ -n "$_pv" ]; then
-                        _default=${_pv%%\@*}
-                    fi
-                fi
-            fi
-        fi
-
-        _dvb=" ($_default)";
-        [ -z "$_default" ] && _dvb=;
-
-        if [ -z "$_value" ] || [ -n "$_force" ] ; then
-            read -r -p "    $_section.$_name$_dvb:" v;
-            [ -z "$v" ] && [ -n "$_default" ] && v=$_default
-            if [ -n "$v" ]; then
-                $gfg "$_section.$_name" "$v";
-                _value=$v;
-            fi
-        else
-            echo "    $_section.$_name: $_value";
-        fi
-    done
-
-    _name=credential.helper
-    $gfg $_name > /dev/null
-    if [ -n "$_os" ] && [[ $? != 0 || "$_name" == "store" ]]; then
-        case $_os in
-            linux)
-                # Try to use KWallet if available
-                _ask=$(command -v ksshaskpass) > /dev/null && \
-                $gfg core.askpass "$_ask"
-
-                # Try to use Gnome-Keyring if available
-                command -v gnome-keyring > /dev/null && \
-                $gfg $_name gnome-keyring;
-            ;;
-            osx)
-                $gfg $_name osxkeychain;
-            ;;
-            windows)
-                $gfg $_name wincred;
-            ;;
-        esac
-    fi
-}
-
-init_dotfiles() {
-
-    # A method to move existing .profile to .extend.profile or .profile.bak
-    _toextend() {
-        local name=$1
-        if [ -s ~/".$name" ] && [ ! -L ~/".$name" ]; then
-            local extend=.extend.$name
-            if [ -s ~/"$extend" ]; then
-                [ -s ~/".$name.bak" ] && echo "Overwriting ~/.$name.bak"
-                mv -- ~/".$name" ~/".$name.bak"
-            else
-                # Old .profile becomes .extend.profile
-                mv -- ~/".$name" ~/"$extend" && \
-
-                # Avoid recursive sourcing
-                sed -ri "s/((^|^[^#]*\s)(\.|source)\s+(\~|\\\$HOME)\/$extend)/#\\1/" ~/"$extend"
-            fi
-        fi
-    }
-
-    local i _i _rc _pc
-
-    ln -sf "$_dotfiles/source" ~/.source
-
-    # Try to take care of sourcing .source automatically
-    _shell=$(shelltype)
-    _rc=~/".${_shell}rc";
-    _pc=~/.profile
-    if [ -n "$_shell" ]; then
-        if [ ! -e "$_rc" ] || is_sourced "~/.profile" "$_rc"; then
-            _i="$_pc"
-        else
-            _i="$_rc"
-        fi
-
-        if is_dotfiles_sourced "$_i"; then
-            i=${_is_sourced:-"$_dotfiles/source"}
-            echo "'$i' sourced in '$_i'"
-        else
-            i=~/.source
-            if [ "$(readlink "$i")" = "$_dotfiles/source" ]; then
-                i="~/.source"
-            else
-                i="$_dotfiles/source"
-            fi
-
-            echo "Adding '. $i' to $_i ..."
-            echo "" >> "$_i"
-            echo ". $i" >> "$_i"
-        fi
-    fi
-
-    # _toextend profile && \
-    # ln -sf "$_dotfiles/.profile" ~/
-
-    _toextend aliasrc && \
-    ln -sf "$_dotfiles/.aliasrc" ~/
-
-    ln -s "$_dotfiles/.gitignore" ~/
-    ln -s "$_dotfiles/.curlrc" ~/
-    ln -s "$_dotfiles/.vimrc" ~/
-
-    # unset -f _toextend
-
-    exists "$_dotfiles/.extend.*" && for _i in "$_dotfiles"/.extend.*; do
-        i=$(basename "$_i")
-        _mark="#dotfiles: $i";
-        if [ -e ~/"$i" ] && grep "$_mark" ~/"$i" > /dev/null; then
-            echo "$i not updated"
-        else
-            echo "Updating $i ..."
-            {
-                echo "";
-                cat "$_i";
-                echo "";
-                echo "$_mark";
-            } >> ~/"$i";
-        fi
-    done
-
-    if command -v git > /dev/null ; then
-        echo -n "Init git?";
-        read -p " [Y/n]" -n 1 -r;
-        echo "";
-        if [[ "${REPLY:-Y}" =~ ^[Yy]?$ ]]; then
-            init_git "$@" # -f for forced update of the config, even when set
-        fi
-    fi
-
-    # [ -n "$_e" ] && [ "$_e" -eq "1" ] && shopt -u expand_aliases
-}
-
-# ------------------------------------------------------------------------------
-dotfiles_url() {
-    ( git --git-dir="$_dotfiles/../.git" remote get-url origin 2> /dev/null || \
-    git --git-dir="$_dotfiles/../.git" config --get remote.origin.url ) | git2url
 }
 
 # ------------------------------------------------------------------------------

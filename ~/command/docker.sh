@@ -19,3 +19,7 @@ alias dbt="docker build -t"
 
 # Run a clean bash container with current folder mounted as /srv
 alias dbash='docker run --rm -it -v "$(pwd):/srv" -w /srv bash'
+
+_aliases_complete+=(
+    dv dva dn de dei ds dr dt drm db dbt
+)

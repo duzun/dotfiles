@@ -9,8 +9,7 @@
     local LASTDIR=$PWD
     local i=$1
     [ $# -eq 0 ] && i=1
-    while [ $i -gt 0 ] && [ "$PWD" != "/" ]
-    do
+    while [ "$i" -gt 0 ] && [ "$PWD" != "/" ]; do
         cd ..
         i=$((i - 1))
     done
@@ -24,7 +23,7 @@ alias ....='cd ../../..'
 # cd up to "partial_str"
 # $ up "partial_str"
 up() {
-    local up;
+    local up
     up=$(expr "$PWD" : "^\(.*$1[^/]*\)")
     [ "x$up" = "x" ] || cd "$up" || return 1
 }
@@ -33,5 +32,7 @@ up() {
 mcd() {
     mkdir -p "$@" && cd "$_" || return $?
 }
+
+alias_completion mcd mkdir
 
 # ------------------------------------------------------------------------------

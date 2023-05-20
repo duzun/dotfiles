@@ -31,12 +31,6 @@ alias glxvendor='glxinfo|grep -i direct\ rendering\\\|vendor\ string'
 alias www="cd /var/www/"
 alias proj="cd /var/www/projects"
 
-# open like on Max
-alias open="xdg-open"
-
-# pause like on Windows
-alias pause="read -t15 -n1 -r -p 'Press any key to continue...' key"
-
 # Empty the Trash
 emptytrash() {
     rm -rfv ~/.local/share/Trash/*
