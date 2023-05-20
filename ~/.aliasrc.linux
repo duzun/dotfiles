@@ -40,26 +40,11 @@ emptytrash() {
 _sudo=
 [ "$(id -u)" -ne "0" ] && _sudo="sudo "
 
-# for systemd
-systemctl=$(command -v systemctl)
-if [ -n "$systemctl" ]; then
-    # alias ss="systemctl"
-    alias ssv="systemctl status"
-    alias sss="${_sudo}${systemctl} start"
-    alias sst="${_sudo}${systemctl} stop"
-    alias ssl="${_sudo}${systemctl} reload"
-    alias ssr="${_sudo}${systemctl} restart"
-    alias sse="${_sudo}${systemctl} enable"
-    alias ssls="$systemctl list-unit-files"
-    alias sslse="$systemctl list-unit-files --state=enabled"
-    alias sslsd="$systemctl list-unit-files --state=disabled"
-fi
-
 # for Manjaro
 pacman=$(command -v pacman)
 if [ -n "$pacman" ]; then
     alias unlock="${_sudo}rm /var/lib/pacman/db.lck"    # remove pacman lock
-    alias cleanup="${_sudo}pacman -Rns (pacman -Qtdq)"  # remove orphaned packages
+    alias cleanup="${_sudo}pacman -Rns \$(pacman -Qtdq)"  # remove orphaned packages
     alias update="${_sudo}pacman -Syu --noconfirm"
 
     alias pcman="open https://www.archlinux.org/pacman/pacman.8.html"
