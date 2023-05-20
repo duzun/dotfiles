@@ -11,7 +11,7 @@
 
 _profile=${BASH_SOURCE:-$0}
 # ------------------------------------------------------------------------------
-if ! command -v realpath > /dev/null; then
+if ! command -v realpath >/dev/null; then
     _realpath() {
         local _l _d
         _l=$1
@@ -43,25 +43,28 @@ declare -l _os
 declare -l _shell
 
 # ------------------------------------------------------------------------------
-. "$_dotfiles/.aliasrc.dotfiles";
+. "$_dotfiles/.aliasrc.dotfiles"
+
+# ------------------------------------------------------------------------------
+_os=$(ostype)
+_shell=$(shelltype)
+
 # ------------------------------------------------------------------------------
 _init_commands() {
     [ -d "$1" ] || return 1
     local _file _cmd _path
     for _file in "$1"/*.sh; do
         _cmd="${_file##*/}"
-        _path=$(command -v "${_cmd%.*}" 2> /dev/null) && . "$_file" "$_path"
+        _path=$(command -v "${_cmd%.*}" 2>/dev/null) && . "$_file" "$_path"
     done
 }
 
 _init_commands "$_dotfiles/command"
 # ------------------------------------------------------------------------------
-[ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc";
-
-# ------------------------------------------------------------------------------
-[ -n "$_shell" ] && [ -f "$_dotfiles/.aliasrc.$_shell" ] && . "$_dotfiles/.aliasrc.$_shell";
-[ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os";
-[ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc;
+[ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc"
+[ -n "$_shell" ] && [ -f "$_dotfiles/.aliasrc.$_shell" ] && . "$_dotfiles/.aliasrc.$_shell"
+[ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os"
+[ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc
 
 # ------------------------------------------------------------------------------
 alias .cd="cd '$_dotfiles/..'"
@@ -71,14 +74,14 @@ alias .open_git="open \"\$(dotfiles_url)\""
 
 # ------------------------------------------------------------------------------
 # Set the prompt and shell behaviour
-. "$_dotfiles/prompt";
+. "$_dotfiles/prompt"
 
 # echo "_aliases_complete (${#_aliases_complete[@]}):" "${_aliases_complete[@]}"
 # echo "_git_aliases_complete (${#_git_aliases_complete[@]}):" "${_git_aliases_complete[@]}"
 
 # ------------------------------------------------------------------------------
 # Custom .profile
-[ -f ~/.extend.source ] && . ~/.extend.source;
+[ -f ~/.extend.source ] && . ~/.extend.source
 
 # ------------------------------------------------------------------------------
 if [ ! -f "$EDITOR_PATH" ]; then
@@ -88,7 +91,7 @@ fi
 
 # ------------------------------------------------------------------------------
 if [ -z "$EDITOR" ] && [ -n "$EDITOR_PATH" ] && [ -x "$EDITOR_PATH" ]; then
-    export EDITOR="$EDITOR_PATH $EDITOR_ARGS";
+    export EDITOR="$EDITOR_PATH $EDITOR_ARGS"
 fi
 
 # ------------------------------------------------------------------------------
@@ -102,12 +105,12 @@ if [[ $- = *i* ]]; then
 
             # When there is no node.js in the environment,
             # load it with nvm
-            command -v node > /dev/null || nvm use node
+            command -v node >/dev/null || nvm use node
         fi
     fi
 
-    composerbin;
-    npmbin;
+    composerbin
+    npmbin
 fi
 
 # ------------------------------------------------------------------------------
@@ -115,22 +118,22 @@ if [ $# -ne 0 ] && [ -z "${BASH_SOURCE[*]}" -o "${BASH_SOURCE[0]}" == "$0" ] && 
     _cmd="$1"
     shift
     case "$_cmd" in
-        init)
-		echo 'init'
-            init_dotfiles "$@"
-            exit $?
+    init)
+        echo 'init'
+        init_dotfiles "$@"
+        exit $?
         ;;
-        init_git)
-            init_git "$@"
-            exit $?
+    init_git)
+        init_git "$@"
+        exit $?
         ;;
-        update)
-            .update
-            exit $?
+    update)
+        .update
+        exit $?
         ;;
-        *)
-            echo_error "Unknown command '$_cmd'";
-            exit 1
+    *)
+        echo_error "Unknown command '$_cmd'"
+        exit 1
         ;;
     esac
 fi

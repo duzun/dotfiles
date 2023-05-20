@@ -13,6 +13,7 @@ fzfb() {
     fzf --bind "enter:become('$cmd' {})"
 }
 
+[ -n "$_shell" ] || _shell=$(shelltype)
 s="${_shell:-bash}"
 
 for i in \
