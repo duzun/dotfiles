@@ -550,44 +550,45 @@ EOH
         return $?
     fi
 
-    local arg
+    declare -a arg
     if [ "$1" = "-h" ] || [ "$1" = "--head" ] || [ "$1" = "--top" ]; then
         shift
         # -<number> arguments go to `head`, except '-0'
         if [ "${1:0:1}" = "-" ] && (( -$1 > 0 )); then
-            arg="$1"
+            arg=("$1")
             shift
         fi
-        fs -s "$@" | head $arg
+        fs -s "$@" | head "${arg[@]}"
         return $?
     fi
 
     # Detect --apparent-size support of `du`
     if du -b --exclude='*' /dev/null > /dev/null 2>&1; then
-        arg=-sbh;
+        arg=(-sbh);
     else
-        arg=-sh;
+        arg=(-sh);
     fi
 
     # Gather du options
     while [ "${1:0:1}" = "-" ] && [ "$1" != "--" ]; do
-        arg="$arg $1"
+        arg+=("$1")
         shift
     done
     [ "$1" = "--" ] && shift
 
     # We need a files list separator --
-    arg="$arg --"
+    arg+=("--")
 
     # If no files arguments, assume all files in current folder
     if [ $# -eq 0 ]; then
-        exists '.[^.]*' && arg="$arg .[^.]*"
-        exists '*' && arg="$arg *"
+        exists '.[^.]*' && arg+=(.[^.]*)
+        exists '*' && arg+=(*)
     fi
 
     # `eval` used just for the sake of zsh, but an unwanted side-effect:
     # `fs -- '*'` is the same as `fs -- *`, but it shouldn't!
-    eval "du $arg" "$@";
+    # eval du "${arg[@]}" "$@";
+    du "${arg[@]}" "$@";
 }
 
 command -v filesize > /dev/null || alias filesize="wc -c <"
