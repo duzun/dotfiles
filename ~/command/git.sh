@@ -47,10 +47,10 @@ alias ggo="git log --oneline"
 alias ggg="git log --oneline --all --graph --decorate"
 alias gk="git cherry-pick"
 alias gw="git show"
-alias gw^="gw HEAD^"
-alias gw^^="gw HEAD~2"
-alias gw^^^="gw HEAD~3"
-alias gw^^^^="gw HEAD~4"
+alias 'gw^'="gw HEAD^"
+alias 'gw^^'="gw HEAD~2"
+alias 'gw^^^'="gw HEAD~3"
+alias 'gw^^^^'="gw HEAD~4"
 alias gfg="git config --global"
 alias gc_counts="git shortlog -s | sort -k1 -nr"
 alias gc_total="git rev-list --all --count"
@@ -71,7 +71,7 @@ _git_aliases_complete+=(
     gg ggo
     ge gea
     gt gf gfg
-    gw gw^
+    gw 'gw^'
 )
 
 _aliases_complete+=(
