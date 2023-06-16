@@ -232,7 +232,10 @@ is_path() {
     local p
     p="${1%/}"
     [ -z "$p" ] && p="$1"
-    sed 's/:/\n/g' <<<"$PATH" | grep -q "^$p/*\$"
+    # bash
+    # sed 's/:/\n/g' <<<"$PATH" | grep -q "^$p/*\$"
+    # POSIX
+    echo "$PATH" | sed 's/:/\n/g' | grep -q "^$p/*\$"
 }
 
 add_path() {
@@ -249,7 +252,10 @@ del_path() {
     if is_path "$p";
     then
         export PATH;
-        PATH=$(sed 's/:/\n/g' <<<"$PATH" | grep -v "^$p/*\$" | sed '{ :q;N;s/\n/:/g;t q }')
+        # bash
+        # PATH=$(sed 's/:/\n/g' <<<"$PATH" | grep -v "^$p/*\$" | sed '{ :q;N;s/\n/:/g;t q }')
+        # POSIX
+        PATH=$(echo "$PATH" | sed 's/:/\n/g' | grep -v "^$p/*\$" | sed '{ :q;N;s/\n/:/g;t q }')
     fi
 }
 
@@ -461,7 +467,10 @@ relpath() {
 
     if [ "${common_part: -1}" != "/" ]; then common_part="${common_part%/*}/"; fi
 
-    ret=$(sed -r 's#[^\/]+\/#../#g' <<< "${source:${#common_part}}")
+    # bash
+    # ret=$(sed -r 's#[^\/]+\/#../#g' <<< "${source:${#common_part}}")
+    # POSIX
+    ret=$(echo "${source:${#common_part}}" | sed -r 's#[^\/]+\/#../#g')
     echo "$ret${target:${#common_part}}";
 }
 
@@ -778,8 +787,8 @@ ex() {
 translit() {
     local NAME=${*:-$(cat)};
     local TRS;
-    TRS=$(sed "y/абвгдезийклмнопрстуфхцы/abvgdezijklmnoprstufxcy/" <<< "$NAME")
-    TRS=$(sed "y/АБВГДЕЗИЙКЛМНОПРСТУФХЦЫ/ABVGDEZIJKLMNOPRSTUFXCY/" <<< "$TRS")
+    TRS=$(echo "$NAME" | sed "y/абвгдезийклмнопрстуфхцы/abvgdezijklmnoprstufxcy/")
+    TRS=$(echo "$TRS" | sed "y/АБВГДЕЗИЙКЛМНОПРСТУФХЦЫ/ABVGDEZIJKLMNOPRSTUFXCY/")
     TRS=${TRS//ч/ch};
     TRS=${TRS//Ч/CH} TRS=${TRS//ш/sh};
     TRS=${TRS//Ш/SH} TRS=${TRS//ё/jo};
@@ -791,7 +800,7 @@ translit() {
     TRS=${TRS//Я/JA} TRS=${TRS//ъ/\`};
     TRS=${TRS//ъ\`} TRS=${TRS//ь/\'};
     TRS=${TRS//Ь/\'}
-    command -v iconv > /dev/null && TRS=$(iconv -c -f UTF8 -t ASCII//TRANSLIT <<< "$TRS")
+    command -v iconv > /dev/null && TRS=$(echo "$TRS" | iconv -c -f UTF8 -t ASCII//TRANSLIT)
     echo "$TRS";
 }
 
