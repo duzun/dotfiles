@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # Unless running interactively, no need to continue
 [[ $- != *i* ]] && return

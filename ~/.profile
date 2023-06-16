@@ -28,7 +28,7 @@ fi
 _profile=$(realpath "$_profile")
 _dotfiles=$(dirname "$_profile")
 
-. "$_dotfiles/source"
+. "$_dotfiles/../.source"
 # . ~/.source
 
 

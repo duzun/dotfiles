@@ -1,102 +1,7 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #######################
 # dotfiles functions  #
 #######################
-
-# ------------------------------------------------------------------------------
-# Detect OS type
-ostype() {
-    local _os;
-
-    case "$OSTYPE" in
-        solaris*) _os=sun ;;
-        darwin*)  _os=osx ;;
-        linux*)   _os=linux ;;
-        bsd*)     _os=bsd ;;
-        msys*)    _os=windows ;;
-        *)        _os=$(uname)
-            case "$_os" in
-                Linux*)           _os=linux ;;
-                Darwin*)          _os=osx ;;
-                FreeBSD|OpenBSD)  _os=bsd ;;
-                SunOS)            _os=sun ;;
-                MINGW32_NT*)      _os=windows ;;
-                # *) declare -l _os; _os="$_os" ;;
-                *) _os="${_os,,}" ;;
-                # *) _os=$(echo "$_os" | awk '{print tolower($0)}') ;;
-            esac
-        ;;
-    esac
-
-    echo "$_os";
-}
-
-# ------------------------------------------------------------------------------
-# Guess the shell type - doesn't quite work in subshells (when not your login shell)
-shelltype() {
-    if [ -n "$ZSH_NAME" ] || [ -n "$ZSH_VERSION" ]; then
-        echo 'zsh'
-    elif [ -n "${BASH_SOURCE:-}" ] || [ -n "$BASH" ]; then
-        echo 'bash'
-    else
-        local s;
-        s=$(realpath /proc/$$/exe); # it's safer to check real processes' path
-        if [ -n "$s" ] && [ "$s" != "/proc/$$/exe" ] && [ -e "$s" ]; then
-            # echo "${s##*/}"
-            basename "$s"
-        elif [ -n "$shell" ]; then
-            # echo "${shell##*/}"
-            basename "$shell"
-        elif [ -n "$SHELL" ]; then
-            basename "$(realpath "$SHELL")"
-        else
-            echo 'sh'; # unknown
-            return 1;
-        fi
-    fi
-}
-
-# ------------------------------------------------------------------------------
-# Test whether a glob has any matches
-# https://stackoverflow.com/questions/2937407/test-whether-a-glob-has-any-matches-in-bash
-exists() {
-    # Bash
-    if command -v compgen > /dev/null
-    then
-        compgen -G "$1" > /dev/null
-        return $?
-    fi
-
-    # Exceptions
-    case "$(shelltype)" in
-        zsh)
-            local f=$1
-            if [ -e "$f" ] || [ -L "$f" ]; then return 0; fi
-
-            # If $1 is a pattern, we have to expand it in zsh:
-            local g
-            g=$(setopt | grep nullglob)
-            setopt nullglob
-            set -- ${~f} 2> /dev/null
-            [ -z "$g" ] && setopt +o nullglob
-            [ "$f" = "$1" ] && return 1
-            [ -e "$1" ] || [ -L "$1" ]
-            return $?
-        ;;
-        # *) ;;
-    esac
-
-    # Non-Bash
-    for f in $1; do
-        ## Check if the glob gets expanded to existing files.
-        ## If not, f here will be exactly the pattern above
-        ## and the exists test will evaluate to false.
-        [ -e "$f" ] || [ -L "$f" ]
-
-        ## This is all we needed to know, so we can break after the first iteration
-        return $?
-    done
-}
 
 # ------------------------------------------------------------------------------
 # Convert a git remote to corresponding HTTP(S) URL
@@ -301,15 +206,19 @@ is_sourced() {
 is_dotfiles_sourced() {
     local _rc="$1"
     local fn=~/.source
+    local _dotfiles_root
+    _dotfiles_root=$(dirname "$_dotfiles")
 
     if [ -z "$_rc" ]; then
         _shell=$(shelltype)
         _rc=~/".${_shell}rc";
     fi
 
-    [ "$(readlink "$fn")" = "$_dotfiles/source" ] && is_sourced '~/.source' "$_rc"  || \
+    [ "$(readlink "$fn")" = "$_dotfiles_root/.source" ] && is_sourced '~/.source' "$_rc"  || \
+    is_sourced "$_dotfiles_root/.source" "$_rc" || \
     is_sourced "$_dotfiles/source" "$_rc" || \
     is_sourced "\$_dotfiles/source" "$_rc" || \
+    is_sourced "\$_dotfiles/../.source" "$_rc" || \
     return 1
 }
 
@@ -334,36 +243,40 @@ init_dotfiles() {
     }
 
     local i _i _rc _pc
+    declare -a _rcs
+    local _dotfiles_root
+    _dotfiles_root=$(dirname "$_dotfiles")
 
-    ln -sf "$_dotfiles/source" ~/.source
+    ln -sf "$_dotfiles_root/.source" ~/.source
 
     # Try to take care of sourcing .source automatically
+    _pc=~/.profile
+    _rcs=("$_pc")
     _shell=$(shelltype)
     _rc=~/".${_shell}rc";
-    _pc=~/.profile
     if [ -n "$_shell" ]; then
-        if [ ! -e "$_rc" ] || is_sourced "~/.profile" "$_rc"; then
-            _i="$_pc"
-        else
-            _i="$_rc"
+        if [ -e "$_rc" ] && ! is_sourced "~/.profile" "$_rc"; then
+            _rcs+=("$_rc")
         fi
+    fi
 
+    for _i in "${_rcs[@]}"; do
         if is_dotfiles_sourced "$_i"; then
-            i=${_is_sourced:-"$_dotfiles/source"}
+            i=${_is_sourced:-"$_dotfiles_root/.source"}
             echo "'$i' sourced in '$_i'"
         else
             i=~/.source
-            if [ "$(readlink "$i")" = "$_dotfiles/source" ]; then
+            if [ "$(readlink "$i")" = "$_dotfiles_root/.source" ]; then
                 i="~/.source"
             else
-                i="$_dotfiles/source"
+                i="$_dotfiles_root/.source"
             fi
 
             echo "Adding '. $i' to $_i ..."
             echo "" >> "$_i"
             echo ". $i" >> "$_i"
         fi
-    fi
+    done
 
     # _toextend profile && \
     # ln -sf "$_dotfiles/.profile" ~/

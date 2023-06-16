@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###################################
 # DUzun's dotfiles main source    #
-# @version 2.3.0                  #
+# @version 2.3.1                  #
 # @author Dumitru Uzun (DUzun.Me) #
 ###################################
 
@@ -43,6 +43,7 @@ declare -l _os
 declare -l _shell
 
 # ------------------------------------------------------------------------------
+. "$_dotfiles/.aliasrc"
 . "$_dotfiles/.aliasrc.dotfiles"
 
 # ------------------------------------------------------------------------------
@@ -61,7 +62,6 @@ _init_commands() {
 
 _init_commands "$_dotfiles/command"
 # ------------------------------------------------------------------------------
-[ -f "$_dotfiles/.aliasrc" ] && . "$_dotfiles/.aliasrc"
 [ -n "$_shell" ] && [ -f "$_dotfiles/.aliasrc.$_shell" ] && . "$_dotfiles/.aliasrc.$_shell"
 [ -n "$_os" ] && [ -f "$_dotfiles/.aliasrc.$_os" ] && . "$_dotfiles/.aliasrc.$_os"
 [ -f ~/.extend.aliasrc ] && . ~/.extend.aliasrc
