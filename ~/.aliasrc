@@ -306,11 +306,11 @@ watchnsync() {
     fi
     [ "${rdir: -1}" = '/' ] || rdir="$rdir/"
 
-    local events=(
-        -e modify
-        -e create
-        # -e move
-        # -e attrib
+    local events=( \
+        # -e move \
+        # -e attrib \
+        -e modify \
+        -e create \
     )
     local args=("$@")
     while i=$(inotifywait -qr "${events[@]}" --exclude "$exclude" "${args[@]}"); do
