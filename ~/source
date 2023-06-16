@@ -37,7 +37,11 @@ _profile=$(realpath "$_profile")
 _dotfiles=$(dirname "$_profile")
 
 _git_aliases_complete=()
-_aliases_complete=()
+_aliases_complete=(
+    dfh du1 du0
+    dcs dcsb dcsu dcsd
+    ccur
+)
 
 declare -l _os
 declare -l _shell

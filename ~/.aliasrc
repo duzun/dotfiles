@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #######################
 # Functions & Aliases #
 #######################
@@ -173,9 +173,9 @@ alias du0='du -d 0'
 # alias dut='du -hsx * | sort -rh | head' # See fs() function below
 alias dut='fs -h -x'
 
-_aliases_complete+=(
-    dfh du1 du0
-)
+# _aliases_complete+=(
+#     dfh du1 du0
+# )
 
 # Add safety nets:
 
@@ -204,9 +204,9 @@ alias dcsb="dcs build"
 alias dcsu="dcs up -d"
 alias dcsd="dcs down"
 
-_aliases_complete+=(
-    dcs dcsb dcsu dcsd
-)
+# _aliases_complete+=(
+#     dcs dcsb dcsu dcsd
+# )
 
 # ------------------------------------------------------------------------------
 command -v colordiff > /dev/null && alias diff='colordiff'
@@ -474,9 +474,9 @@ done
 # cURL with Cookies
 alias ccurl="curl -b /tmp/cookie_curl.txt -c /tmp/cookie_curl.txt"
 alias ccurl_edit="command \${EDITOR_PATH:-\$EDITOR} /tmp/cookie_curl.txt"
-_aliases_complete+=(
-    ccurl
-);
+# _aliases_complete+=(
+#     ccurl
+# )
 # alias_completion ccurl
 
 # Download first argument to stdout
