@@ -290,46 +290,53 @@ watchnsync() {
         return 1
     fi
 
-    local rdir=$1
+    local remoteDir="$1"
     shift
 
-    if [ -z "$rdir" ]; then
+    if [ -z "$remoteDir" ]; then
         echo >&2 "Usage: ( cd <baseDir> && watchnsync <remoteDir>/ { <watchDir>/ }"
         return 2
     fi
 
-    local exclude="node_modules|vendor"
+    local watchDir="${1:-./}"
+    shift
 
-    if [ "$#" -lt "1" ]; then
-        exclude=".git|$exclude"
-        set -- ./
+    if [ ! -e "$watchDir" ]; then
+        echo >&2 "Watch directory doesn't exist: $watchDir"
+        return 3
     fi
-    [ "${rdir: -1}" = '/' ] || rdir="$rdir/"
 
-    local events=( \
-        # -e move \
-        # -e attrib \
+    watchDir=$(realpath "$watchDir")
+
+    local exclude="node_modules|vendor|.git|cache|tmp"
+
+    [ "$(echo "$remoteDir" | cut -c "${#remoteDir}")" = '/' ] || remoteDir="$remoteDir/"
+    [ "$(echo "$watchDir" | cut -c "${#watchDir}")" = '/' ] || watchDir="$watchDir/"
+
+    while i=$(inotifywait -qr \
         -e modify \
         -e create \
-    )
-    local args=("$@")
-    while i=$(inotifywait -qr "${events[@]}" --exclude "$exclude" "${args[@]}"); do
+        `# -e move` \
+        `# -e attrib` \
+        --exclude "$exclude" \
+        "$watchDir" \
+        | cut -c "${#watchDir}-" \
+        | sed -r 's#^/(.*/)? (MODIFY|CREATE) ([^/].*)$#\2 \1\3#' \
+    ); do
         set -- $i
-
-        local dir=$1
-        local evt=$2
-        local file=$3
-
-        local fn="$dir$file"
-        [ "${dir:0:2}" = './' ] && dir="${dir:2}"
-        local dst="$rdir$dir"
+        local evt="$1"
+        shift
+        local file="$*"
+        local src="$watchDir$file"
+        local dst="$remoteDir$file"
 
         echo
-        echo "$evt $fn"
+        echo "$evt $src"
 
         case $evt in
             MODIFY|CREATE)
-                rsync -rlptzzsDhP "$fn" "$dst"
+                # --mkpath was added in rsync v3.2.3
+                rsync -rlptzzsDhP --mkpath "$src" "$dst"
             ;;
             *)
                 echo >&2 "evt $evt ($i) not implemented yet"
