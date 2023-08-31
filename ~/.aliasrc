@@ -102,6 +102,60 @@ exists() {
     done
 }
 
+# Expand a glob
+expand_glob() {
+    # Bash
+    if command -v compgen > /dev/null
+    then
+        while [ $# -ne 0 ]; do
+            compgen -G "$1"
+            shift
+        done
+        return $?
+    fi
+
+    local f
+
+    # Exceptions
+    case "$(shelltype)" in
+        zsh)
+            # If $1 is a pattern, we have to expand it in zsh:
+            local g
+            g=$(setopt | grep nullglob)
+            setopt nullglob
+
+            while [ $# -ne 0 ]; do
+                ( for f in ${~1}; do echo "$f"; done ) || echo "$1"
+                shift
+            done
+            local r=$?
+
+            [ -z "$g" ] && setopt +o nullglob
+            return $r
+        ;;
+        # *) ;;
+    esac
+
+    while [ $# -ne 0 ]; do
+        # Non-Bash
+        for f in $1; do
+            echo "$f"
+        done
+        shift
+    done
+}
+
+# Quote all the arguments with a single quote (').
+# The end result is intended as an argument for a shell command.
+# Eg.
+# > quote_sh 1 2 3
+# '1 2 3'
+# > quote_sh 1 "'"2 3"'"
+# '1 '"'"'2 3'"'"''
+quote_sh() {
+    echo "'$(echo "$@" | sed "s/'/'\"'\"'/g")'"
+}
+
 # ------------------------------------------------------------------------------
 # bash only, but cool :-)
 if_os () { [[ $OSTYPE == *$1* ]]; }
@@ -671,7 +725,7 @@ EOH
     if [ "$1" = "-s" ] || [ "$1" = "--sort" ]; then
         shift
         # Detect --human sort support
-        if sort --help | grep -- '--human' > /dev/null; then
+        if ( sort --help | grep -- '--human' ) > /dev/null 2>&1; then
             fs "$@" | sort -rh
         else
             fs "$@" | sort -rn
@@ -679,45 +733,54 @@ EOH
         return $?
     fi
 
-    declare -a arg
+    local arg
     if [ "$1" = "-h" ] || [ "$1" = "--head" ] || [ "$1" = "--top" ]; then
         shift
+        arg=-10
         # -<number> arguments go to `head`, except '-0'
-        if [ "${1:0:1}" = "-" ] && (( -$1 > 0 )); then
-            arg=("$1")
+        if [ "${1:0:1}" = "-" ] && [ "$1" -lt 0 ] 2> /dev/null ; then
+            arg="$1"
             shift
         fi
-        fs -s "$@" | head "${arg[@]}"
+        fs -s "$@" | head "$arg"
         return $?
     fi
 
     # Detect --apparent-size support of `du`
     if du -b --exclude='*' /dev/null > /dev/null 2>&1; then
-        arg=(-sbh);
+        arg=-sbh;
     else
-        arg=(-sh);
+        arg=-sh;
     fi
 
     # Gather du options
     while [ "${1:0:1}" = "-" ] && [ "$1" != "--" ]; do
-        arg+=("$1")
+        arg="$arg $1"
         shift
     done
     [ "$1" = "--" ] && shift
 
     # We need a files list separator --
-    arg+=("--")
+    arg="$arg --"
 
     # If no files arguments, assume all files in current folder
     if [ $# -eq 0 ]; then
-        exists '.[^.]*' && arg+=(.[^.]*)
-        exists '*' && arg+=(*)
+        arg="$arg $( \
+            ( \
+                exists '.[!.]*' && expand_glob '.[!.]*'; \
+                exists '*' && expand_glob '*' \
+            ) | while read -r f; do quote_sh "$f"; done \
+            | tr "\n" " "
+        )"
+    else
+        while [ $# -ne 0 ]; do
+            arg="$arg $(quote_sh "$1")"
+            shift
+        done
     fi
 
-    # `eval` used just for the sake of zsh, but an unwanted side-effect:
-    # `fs -- '*'` is the same as `fs -- *`, but it shouldn't!
-    # eval du "${arg[@]}" "$@";
-    du "${arg[@]}" "$@";
+    eval "du $arg";
+    # du "${arg[@]}" "$@";
 }
 
 command -v filesize > /dev/null || alias filesize="wc -c <"
