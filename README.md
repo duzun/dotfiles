@@ -1,6 +1,6 @@
 # ⊙ dotfiles
 
-My dotfiles (Linux, OSX &amp; Windows) for bash &amp; zsh on PC &amp; server
+My dotfiles (Linux, OSX &amp; Windows) for bash &amp; zsh (and sh) on PC &amp; server &amp; Docker
 
 ## ⚙ Install
 
@@ -43,6 +43,14 @@ There is a special alias for updating `dotfiles`:
 ```sh
 .update
 ```
+
+You could add the light version of aliases to a Docker image:
+
+```docker
+ADD https://raw.githubusercontent.com/duzun/dotfiles/master/~/.aliasrc /etc/profile.d/aliases.sh
+```
+
+This is not the full dotfiles environment, but only the most aliases and functions.
 
 ## 🔗 Links
 
