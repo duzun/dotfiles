@@ -242,7 +242,7 @@ map <leader>t<leader> :tabnext
 
 " Let 'tl' toggle between this and the last accessed tab
 let g:lasttab = 1
-nmap <Leader>tl :exe "tabn ".g:lasttab<CR>
+nmap <leader>tl :exe "tabn ".g:lasttab<CR>
 au TabLeave * let g:lasttab = tabpagenr()
 
 
@@ -294,6 +294,11 @@ if has("mac") || has("macunix")
   vmap <D-j> <M-j>
   vmap <D-k> <M-k>
 endif
+
+" Copy to system clipboard (gvim)
+nnoremap Y "+y
+vnoremap Y "+y
+nnoremap yY ^"+y$
 
 " Delete trailing white space on save, useful for some filetypes ;)
 fun! CleanExtraSpaces()

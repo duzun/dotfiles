@@ -82,22 +82,23 @@ if [ -n "$pacman" ]; then
 fi
 
 # for Manajaro with AUR (consider using yay)
-yaourt=$(command -v paru)
-[ -z "$yaourt" ] && yaourt=$(command -v yaourt)
-if [ -n "$yaourt" ]; then
-    alias y="$yaourt"                  # search
-    alias yq="$yaourt --noconfirm"     # search +silent
-    alias yu="$yaourt -Syu"            # update standard pkgs and AUR pkgs
-    alias yuq="yu --noconfirm"  # update & upgrade
-    alias yua="$yaourt -Sua"           # update only AUR pkgs
-    alias yuaq="yua --noconfirm" # update & upgrade + AUR (less safe)
-    alias yyua="$yaourt -Syua"         # update & upgrade + AUR (less safe)
-    alias yyuaq="yyua --noconfirm"  # update & upgrade + AUR (less safe)
-    alias yi="$yaourt -S"              # <pkg_name> # install
-    alias yiq="$yaourt --noconfirm -S" # <pkg_name> # install +silent
-    alias yr="$yaourt -R"              # <pkg_name> # uninstall
-    alias yrf="$yaourt -Rsn"           # <pkg_name> # uninstall completely: configs and dependencies
-    alias yl="$yaourt -Qm"             # list installed packages
+y=$(command -v paru)
+[ -z "$y" ] && y=$(command -v yay)
+[ -z "$y" ] && y=$(command -v yaourt)
+if [ -n "$y" ]; then
+    alias y="$y"                   # search
+    alias yq="$y --noconfirm"      # search +silent
+    alias yu="$y -Syu"             # update standard pkgs and AUR pkgs
+    alias yuq="yu --noconfirm"     # update & upgrade
+    alias yua="$y -Sua"            # update only AUR pkgs
+    alias yuaq="yua --noconfirm"   # update & upgrade + AUR (less safe)
+    alias yyua="$y -Syua"          # update & upgrade + AUR (less safe)
+    alias yyuaq="yyua --noconfirm" # update & upgrade + AUR (less safe)
+    alias yi="$y -S"               # <pkg_name> # install
+    alias yiq="$y --noconfirm -S"  # <pkg_name> # install +silent
+    alias yr="$y -R"               # <pkg_name> # uninstall
+    alias yrf="$y -Rsn"            # <pkg_name> # uninstall completely: configs and dependencies
+    alias yl="$y -Qm"              # list installed packages
 
     if [ -n "$pacman" ]; then
         alias updatea="update && yuaq"
