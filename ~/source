@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###################################
 # DUzun's dotfiles main source    #
-# @version 2.3.1                  #
+# @version 2.3.2                  #
 # @author Dumitru Uzun (DUzun.Me) #
 ###################################
 
@@ -110,6 +110,13 @@ if [[ $- = *i* ]]; then
             # When there is no node.js in the environment,
             # load it with nvm
             command -v node >/dev/null || nvm use node
+        fi
+    fi
+
+    if [ -z "$VOLTA_HOME" ]; then
+        export VOLTA_HOME=~/.volta
+        if [ -d "$VOLTA_HOME/bin" ]; then
+            add_path "$VOLTA_HOME/bin"
         fi
     fi
 
