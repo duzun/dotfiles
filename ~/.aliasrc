@@ -1052,11 +1052,15 @@ npmbin() {
 
 # Add to path composer's bin folder
 composerbin() {
-    local composerbin;
+    local composerbin return
 
     # Global
     composerbin=~/.composer/vendor/bin;
     add_path "$composerbin" # && echo "$composerbin";
+    return=$?
+
+    # If only global, return here
+    [ "$1" = "-g" ] && return "$return"
 
     # Local
     composerbin=${PWD:-$(pwd)}/vendor/bin;
