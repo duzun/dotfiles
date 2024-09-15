@@ -4,10 +4,6 @@
 #######################
 
 # ------------------------------------------------------------------------------
-_alias=$(realpath "${BASH_SOURCE:-$0}")
-_dotfiles=$(dirname "$_alias")
-
-# ------------------------------------------------------------------------------
 # Detect OS type
 ostype() {
     local _os;
@@ -1067,5 +1063,21 @@ composerbin() {
     add_path "$composerbin" && echo "$composerbin";
     return $?;
 }
+
+# ------------------------------------------------------------------------------
+case $(shelltype) in
+    bash) _alias="${BASH_SOURCE}" ;; # if empty, not sourced -> don't care about $_alias
+    zsh) _alias="${(%):-%N}" ;;
+    # the best we have in the general case
+    busybox|*)
+        # BusyBox doesn't respect -p, thus use grep
+        _alias="$(lsof -p $$ 2> /dev/null | grep "\b$$\b" | tail -1 | tr ' \t' '\n' | tail -1)"
+    ;;
+esac
+
+if [ -n "$_alias" ]; then
+    _alias=$(realpath "$_alias")
+    _dotfiles=$(dirname "$_alias")
+fi
 
 # ------------------------------------------------------------------------------

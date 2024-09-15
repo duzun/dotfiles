@@ -1,6 +1,12 @@
 # This file name is deprecated in favour of dotfiles/~/source (which is symlinked to ~/.source)
 
-_profile=${BASH_SOURCE:-$0}
+if [ -n "$ZSH_NAME" ] || [ -n "$ZSH_VERSION" ]; then
+    _profile="${(%):-%N}"
+elif [ -n "$BASH" ]; then
+    _profile=${BASH_SOURCE:-$0}
+else
+    _profile=$(lsof -p $$ 2> /dev/null | grep "\b$$\b" | tail -1 | tr ' \t' '\n' | tail -1)
+fi
 # ------------------------------------------------------------------------------
 if ! command -v realpath > /dev/null; then
     _realpath() {
