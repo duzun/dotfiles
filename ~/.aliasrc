@@ -246,6 +246,7 @@ fi
 ## confirmation #
 alias mv='mv -i'
 alias cp='cp -i'
+alias cps='cp --sparse=always'
 ln --help 2> /dev/null | grep -q -- '--interactive' && alias ln='ln -i'
 
 # docker-compose
@@ -386,7 +387,7 @@ watchnsync() {
         case $evt in
             MODIFY|CREATE)
                 # --mkpath was added in rsync v3.2.3
-                rsync -rlptzzsDhP --mkpath "$src" "$dst"
+                rsync -rlptzzsDhP --sparse --mkpath "$src" "$dst"
             ;;
             *)
                 echo >&2 "evt $evt ($i) not implemented yet"
