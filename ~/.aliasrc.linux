@@ -109,8 +109,47 @@ fi
 
 logout() {
     case "$XDG_CURRENT_DESKTOP" in
-        GNOME) gnome-session-quit --force;;
-        KDE) qdbus org.kde.ksmserver /KSMServer logout 0 3 3;;
-        *) qdbus org.kde.ksmserver /KSMServer logout 0 3 3 || gnome-session-quit --force;;
+        GNOME)
+            gnome-session-quit --logout --force
+        ;;
+        KDE)
+            qdbus org.kde.Shutdown /Shutdown logout || \
+            qdbus org.kde.ksmserver /KSMServer logout 0 3 3
+        ;;
+        *)
+            qdbus org.kde.Shutdown /Shutdown logout || \
+            qdbus org.kde.ksmserver /KSMServer logout 0 3 3 || \
+            gnome-session-quit --force
+        ;;
     esac;
+}
+
+kreboot() {
+     case "$XDG_CURRENT_DESKTOP" in
+        GNOME)
+            gnome-session-quit --reboot --force
+        ;;
+        KDE)
+            qdbus org.kde.Shutdown /Shutdown logoutAndReboot
+        ;;
+        *)
+            qdbus org.kde.Shutdown /Shutdown logoutAndReboot || \
+            gnome-session-quit --reboot --force
+        ;;
+    esac
+}
+
+kdown() {
+     case "$XDG_CURRENT_DESKTOP" in
+        GNOME)
+            gnome-session-quit --power-off --force
+        ;;
+        KDE)
+            qdbus org.kde.Shutdown /Shutdown logoutAndShutdown
+        ;;
+        *)
+            qdbus org.kde.Shutdown /Shutdown logoutAndShutdown || \
+            gnome-session-quit --reboot --force
+        ;;
+    esac
 }
