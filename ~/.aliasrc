@@ -1052,8 +1052,11 @@ composerbin() {
     local composerbin return
 
     # Global
-    composerbin=~/.composer/vendor/bin;
-    add_path "$composerbin" # && echo "$composerbin";
+    composerbin=~/.composer/vendor/bin
+    if [ ! -d "$composerbin" ]; then
+        composerbin=~/.config/composer/vendor/bin;
+    fi
+    add_path "$composerbin"
     return=$?
 
     # If only global, return here
