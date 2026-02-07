@@ -99,6 +99,9 @@ if [ -n "$y" ]; then
     alias yr="$y -R"               # <pkg_name> # uninstall
     alias yrf="$y -Rsn"            # <pkg_name> # uninstall completely: configs and dependencies
     alias yl="$y -Qm"              # list installed packages
+    alias yy="$y -Ps"              # installed packages summary
+    alias yc="$y -Sc"              # clean cache
+    alias ycc="$y -Scc"            # clean all cache
 
     if [ -n "$pacman" ]; then
         alias updatea="update && yuaq"
@@ -112,14 +115,15 @@ logout() {
         GNOME)
             gnome-session-quit --logout --force
         ;;
-        KDE)
-            qdbus org.kde.Shutdown /Shutdown logout || \
-            qdbus org.kde.ksmserver /KSMServer logout 0 3 3
-        ;;
-        *)
+        KDE|*)
+            # Try the modern LogoutPrompt first (Wayland/X11 friendly)
+            ( command -v qdbus-qt6 > /dev/null && qdbus-qt6 org.kde.LogoutPrompt /LogoutPrompt logout ) || \
+            ( command -v qdbus-qt5 > /dev/null && qdbus-qt5 org.kde.LogoutPrompt /LogoutPrompt logout ) || \
+            qdbus org.kde.LogoutPrompt /LogoutPrompt logout || \
             qdbus org.kde.Shutdown /Shutdown logout || \
             qdbus org.kde.ksmserver /KSMServer logout 0 3 3 || \
-            gnome-session-quit --force
+            gnome-session-quit --force || \
+            loginctl terminate-session "${XDG_SESSION_ID:-self}" # Fallback for generic environments
         ;;
     esac;
 }
@@ -129,12 +133,16 @@ kreboot() {
         GNOME)
             gnome-session-quit --reboot --force
         ;;
-        KDE)
-            qdbus org.kde.Shutdown /Shutdown logoutAndReboot
-        ;;
-        *)
+        KDE|*)
+            # Try D-Bus methods (Graceful)
+            ( command -v qdbus-qt6 > /dev/null && qdbus-qt6 org.kde.LogoutPrompt /LogoutPrompt reboot ) || \
+            ( command -v qdbus-qt5 > /dev/null && qdbus-qt5 org.kde.LogoutPrompt /LogoutPrompt reboot ) || \
+            qdbus org.kde.LogoutPrompt /LogoutPrompt reboot || \
             qdbus org.kde.Shutdown /Shutdown logoutAndReboot || \
-            gnome-session-quit --reboot --force
+
+            # Fallbacks (Forceful)
+            gnome-session-quit --reboot --force || \
+            systemctl reboot
         ;;
     esac
 }
@@ -144,12 +152,16 @@ kdown() {
         GNOME)
             gnome-session-quit --power-off --force
         ;;
-        KDE)
-            qdbus org.kde.Shutdown /Shutdown logoutAndShutdown
-        ;;
-        *)
+        KDE|*)
+            # Try D-Bus methods (Graceful)
+            ( command -v qdbus-qt6 > /dev/null && qdbus-qt6 org.kde.LogoutPrompt /LogoutPrompt shutdown ) || \
+            ( command -v qdbus-qt5 > /dev/null && qdbus-qt5 org.kde.LogoutPrompt /LogoutPrompt shutdown ) || \
+            qdbus org.kde.LogoutPrompt /LogoutPrompt shutdown || \
             qdbus org.kde.Shutdown /Shutdown logoutAndShutdown || \
-            gnome-session-quit --reboot --force
+
+            # Fallbacks (Forceful)
+            gnome-session-quit --power-off --force || \
+            systemctl poweroff
         ;;
     esac
 }

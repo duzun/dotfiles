@@ -128,7 +128,7 @@ if [[ $- = *i* ]]; then
         fi
     fi
 
-    # If direnv hooked and .envrc exists in current dirrectory,
+    # If direnv hooked and .envrc exists in current directory,
     # don't add local composer and npm to the path. Let dotenv handle this dir.
     if command -v _direnv_hook > /dev/null && [ -e "$PWD/.envrc" ]; then
         composerbin -g
